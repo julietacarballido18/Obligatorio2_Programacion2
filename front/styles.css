@@ -316,7 +316,7 @@ main {
 /* =====  GALERÍA DE OBRAS (mosaico con scroll horizontal) ===== */
 /* Grilla de 3 filas de alto fijo. Las obras se van ubicando columna por columna, así que la galería crece hacia la derecha y el borde de abajo queda parejo. */
 .galeria-obras {
-    background: linear-gradient(#000, #000) top / 100% var(--alto-galeria) no-repeat; /* fondo negro solo detrás de las obras: se ve en los huecos de 1px */
+    background: #fff;                               /* fondo blanco: los huecos y las separaciones quedan del color de la página */
   --separacion: 1px;
   --barra: 12px;                                  /* espacio reservado para la barra de desplazamiento */
   --alto-galeria: calc(100vh - var(--alto-header) - var(--barra)); /* alto de la pantalla menos el header y la barra */
@@ -1197,4 +1197,102 @@ main {
     margin-right: 0;
     scale: 0.65;
   }
+}
+
+/* =====  ACCESO: login y registro ===== */
+.acceso {
+  position: fixed;
+  inset: 0;                                /* ocupa toda la pantalla */
+  z-index: 150;                            /* arriba de la página y los pop ups (100), debajo del onboarding (200) */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: #fff;
+  overflow-y: auto;                        /* en celular, si no entra, se puede bajar */
+}
+
+.acceso[hidden],
+.formulario-acceso[hidden] {
+  display: none;                           /* que el hidden funcione aunque tenga display flex */
+}
+
+.contenido-acceso {
+  width: 100%;
+  max-width: 420px;                        /* formulario angosto y centrado */
+}
+
+.formulario-acceso {
+  display: flex;
+  flex-direction: column;                  /* todo apilado */
+}
+
+.titulo-acceso {
+  font-family: var(--fuente-titulos);
+  font-weight: 400;
+  font-size: clamp(2rem, 6vw, 3rem);       /* grande, pero se achica en pantallas chicas */
+  line-height: 1;
+  margin-bottom: 2rem;
+}
+
+.formulario-acceso label {
+  font-family: var(--fuente-titulos);
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+.formulario-acceso input {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  border: 1px solid #000;
+  border-radius: 0;                        /* esquinas rectas, como el resto */
+  font-family: var(--fuente-texto);
+  font-size: 0.85rem;
+  margin-bottom: 1.5rem;
+}
+
+.acceso .boton-entrar {
+  animation: none;                         /* sin la animación de entrada del onboarding */
+  align-self: flex-start;
+  margin-top: 0.5rem;
+}
+
+.cambiar-acceso {
+  margin-top: 1.5rem;
+  font-size: 0.8rem;
+}
+
+/* "Registrate" / "Iniciá sesión": botón que parece link */
+.link-acceso {
+  margin: 0;
+  padding: 0;
+  background: none;
+  color: #000;
+  border-radius: 0;
+  font-size: inherit;
+  text-decoration: underline;
+}
+
+.link-acceso:hover {
+  opacity: 0.6;
+}
+
+/* ===== MENÚ DE INICIO (Cerrar sesión) ===== */
+.contenedor-inicio {
+  position: relative;                      /* el menú se ubica respecto a este botón */
+}
+
+.menu-inicio {
+  position: absolute;
+  top: 100%;                               /* justo debajo de "Inicio" */
+  left: 0;
+  width: 100%;                             /* mismo ancho que el botón */
+}
+
+.menu-inicio[hidden] {
+  display: none;
+}
+
+.menu-inicio .boton-categoria {
+  margin-top: -1px;                        /* pisa el borde de "Inicio": no queda borde doble */
 }

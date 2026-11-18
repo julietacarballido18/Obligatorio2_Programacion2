@@ -1,12 +1,14 @@
 // Todo pasa por el proxy local (servidor-proxy.js), no directo al museo.
-const PROXY_LOCAL = "http://localhost:3000/museo";ufncio
+import { BACK_URL } from "./config.js";
+const PROXY_LOCAL = `${BACK_URL}/museo`;
+
 const BASE_URL = `${PROXY_LOCAL}/api/v1`;
 
-const LIST_FIELDS = "id,title,date_display,artist_display,image_id,thumbnail"; /* Campos que pedimos siempre en el listado, para no traer de más. */
+const LIST_FIELDS = "id,title,date_display,artist_display,image_id,thumbnail,color"; /* Campos que pedimos siempre en el listado, para no traer de más. */
 
 // ---------- CAMPOS DETALLE DE OBRA ----------
 const DETAIL_FIELDS =
-  "id,title,date_display,artist_display,image_id,thumbnail,medium_display," +
+  "id,title,date_display,artist_display,image_id,thumbnail,color,medium_display," +
   "dimensions,department_title,short_description";
 
 // ---------- SERVIDOR DE IMÁGENES ----------

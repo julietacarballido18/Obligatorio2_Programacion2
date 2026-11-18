@@ -12,6 +12,7 @@ import {
   renderizarVerColeccion,
 } from "./render.js";
 import { crearColeccion, obtenerColecciones, agregarObraAColeccion, obtenerColeccion } from "./colecciones.js";
+import { login, registrar, estaLogueado, cerrarSesion } from "./auth.js";
 
 
 // ---------- PAGINACIÓN ----------
@@ -161,6 +162,9 @@ const onboarding = document.getElementById("onboarding");
 const botonEntrar = document.getElementById("boton-entrar");
 
 botonEntrar.addEventListener("click", () => {
+  if (!estaLogueado()) {                   // ¿Ya tiene sesión iniciada? Si no → login
+    mostrarLogin();                        // queda detrás del onboarding, y se ve cuando este sube
+  }
   onboarding.classList.add("saliendo");    //arranca la animación de salida (CSS)
   setTimeout(() => {
     onboarding.hidden = true;              //cuando termina (600ms), lo sacamos del todo
@@ -175,6 +179,93 @@ botonLogo.addEventListener("click", () => {
   onboarding.hidden = false;               //lo vuelve a mostrar y sus animaciones de entrada se repiten
 });
 
+// ---------- ACCESO: LOGIN, REGISTRO Y CERRAR SESIÓN ----------
+const pantallaAcceso = document.getElementById("acceso");
+const formularioLogin = document.getElementById("formulario-login");
+const formularioRegistro = document.getElementById("formulario-registro");
+const errorLogin = document.getElementById("error-login");
+const errorRegistro = document.getElementById("error-registro");
+
+// MUESTRA UN ERROR DEBAJO DEL FORMULARIO
+const mostrarErrorAcceso = (parrafo, texto) => {
+  parrafo.textContent = texto;
+  parrafo.hidden = false;
+};
+
+// MUESTRA LA PANTALLA DE LOGIN
+const mostrarLogin = () => {
+  formularioRegistro.hidden = true;
+  formularioLogin.hidden = false;
+  errorLogin.hidden = true;
+  pantallaAcceso.hidden = false;
+};
+
+// MUESTRA LA PANTALLA DE REGISTRO
+const mostrarRegistro = () => {
+  formularioLogin.hidden = true;
+  formularioRegistro.hidden = false;
+  errorRegistro.hidden = true;
+};
+
+// OCULTA LA PANTALLA DE ACCESO Y LIMPIA LOS CAMPOS (se entra a la galería)
+const entrarAlMuseo = () => {
+  formularioLogin.reset();
+  formularioRegistro.reset();
+  pantallaAcceso.hidden = true;
+  // (acá Cande va a cargar las colecciones del usuario)
+};
+
+document.getElementById("ir-a-registro").addEventListener("click", mostrarRegistro);
+document.getElementById("ir-a-login").addEventListener("click", mostrarLogin);
+
+// LOGIN
+formularioLogin.addEventListener("submit", async (evento) => {
+  evento.preventDefault();                                   // que no se recargue la página
+  const email = document.getElementById("login-email").value.trim();
+  const password = document.getElementById("login-password").value;
+
+  if (email === "" || password === "") {
+    mostrarErrorAcceso(errorLogin, "Completá email y contraseña.");
+    return;
+  }
+
+  try {
+    await login(email, password);                            // si sale bien, auth.js guarda el token
+    entrarAlMuseo();
+  } catch (error) {
+    mostrarErrorAcceso(errorLogin, error.message);           // ej: "Email o contraseña incorrectos"
+  }
+});
+
+// REGISTRO (y después login automático)
+formularioRegistro.addEventListener("submit", async (evento) => {
+  evento.preventDefault();
+  const nombre = document.getElementById("registro-nombre").value.trim();
+  const email = document.getElementById("registro-email").value.trim();
+  const password = document.getElementById("registro-password").value;
+
+  try {
+    await registrar(nombre, email, password);                // crea la cuenta
+    await login(email, password);                            // y entra con los mismos datos
+    entrarAlMuseo();
+  } catch (error) {
+    mostrarErrorAcceso(errorRegistro, error.message);        // ej: "Ya existe una cuenta con ese email"
+  }
+});
+
+// MENÚ DE INICIO: al tocar "Inicio" se despliega o se pliega
+const menuInicio = document.getElementById("menu-inicio");
+document.getElementById("boton-inicio").addEventListener("click", () => {
+  menuInicio.hidden = !menuInicio.hidden;                    // si estaba oculto lo muestra, y al revés
+});
+
+// CERRAR SESIÓN → vuelve al login
+document.getElementById("boton-cerrar-sesion").addEventListener("click", () => {
+  menuInicio.hidden = true;                                  // cierra el menú
+  cerrarSesion();                                            // borra el token
+  mostrarLogin();
+  // (acá Cande va a vaciar las colecciones de la pantalla)
+});
 
 //CREAR NUEVA COLECCION
 const formularioNuevaColeccion = document.getElementById("formulario-nueva-coleccion");

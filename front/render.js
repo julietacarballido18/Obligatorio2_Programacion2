@@ -7,16 +7,25 @@ const estadoGaleria = document.getElementById("estado-galeria");
 
 const idsMostrados = new Set(); /* guarda los id de las obras que ya están en la galería (un Set no admite repetidos) */
 
+/* Arma el recuadro que se ve cuando una obra no tiene imagen:
+   lo pinta con el color representativo de la obra (si la API lo trae) */
+const crearSinImagen = (obra, texto) => {
+  const vacio = document.createElement("div");
+  vacio.className = "sin-imagen";
+  vacio.textContent = texto;
+  if (obra.color) {
+    vacio.style.background = `hsl(${obra.color.h}, ${obra.color.s}%, ${obra.color.l}%)`; /* el color de la obra */
+    vacio.style.color = obra.color.l < 50 ? "#fff" : "#000";                              /* texto claro sobre fondo oscuro, y al revés */
+  }
+  return vacio;
+};
+
 const crearImagenObra = (obra, clase = "") => { /* Crea la imagen de una obra. Si la real falla, usa la miniatura borrosa de la API. */
   const urlImagen = construirUrlImagen(obra.image_id, obra.thumbnail?.width);
-  const respaldo = obra.thumbnail?.lqip; /* respaldo de imagenes por si no cargan */
+  const respaldo = obra.thumbnail?.lqip; /* miniatura borrosa de respaldo */
 
-
-  if (!urlImagen && !respaldo) { /* Si no hay ni imagen ni miniatura, mostramos un recuadro vacío */
-    const vacio = document.createElement("div");
-    vacio.className = "sin-imagen";
-    vacio.textContent = "Sin imagen";
-    return vacio;
+  if (!urlImagen && !respaldo) { /* sin imagen ni miniatura: recuadro con el color de la obra */
+    return crearSinImagen(obra, "Sin imagen");
   }
 
   const img = document.createElement("img");
@@ -25,15 +34,11 @@ const crearImagenObra = (obra, clase = "") => { /* Crea la imagen de una obra. S
   if (clase) img.className = clase;
   img.src = urlImagen ?? respaldo;
 
-
-  img.addEventListener("error", () => { /* Si la imagen no carga, probamos con la miniatura */
+  img.addEventListener("error", () => { /* Si la imagen no carga, probamos con la miniatura y si no, el color */
     if (respaldo && img.src !== respaldo) {
       img.src = respaldo;
     } else {
-      const vacio = document.createElement("div");
-      vacio.className = "sin-imagen";
-      vacio.textContent = "Imagen no disponible";
-      img.replaceWith(vacio);
+      img.replaceWith(crearSinImagen(obra, "Imagen no disponible"));
     }
   });
 
