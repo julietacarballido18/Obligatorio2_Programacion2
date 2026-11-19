@@ -1,16 +1,31 @@
 import { BACK_URL } from "./config.js"
 
-// EL TOKEN VIVE ACA (no se exporta: se lee con getToken)
-let token = ""
+// ---------- EL TOKEN SE GUARDA EN localStorage ----------
+// (sobrevive a F5, a una pestaña nueva y a cerrar el navegador)
+
+// GUARDA EL TOKEN
+function guardarToken(t) {
+    localStorage.setItem("token", t)
+}
+
+// LEE EL TOKEN (si no hay, devuelve "")
+function leerToken() {
+    return localStorage.getItem("token") || ""
+}
+
+// BORRA EL TOKEN
+function borrarToken() {
+    localStorage.removeItem("token")
+}
 
 // DEVUELVE EL TOKEN ACTUAL
 export function getToken() {
-    return token
+    return leerToken()
 }
 
 // ¿HAY ALGUIEN CON LA SESION INICIADA?
 export function estaLogueado() {
-    return token !== ""
+    return leerToken() !== ""
 }
 
 // REGISTRO: crea la cuenta en el back
@@ -28,7 +43,7 @@ export async function registrar(nombre, email, password) {
 }
 
 // LOGIN: entra con email y contraseña y guarda el token
-export async function login(email, password) { 
+export async function login(email, password) {
     const respuesta = await fetch(`${BACK_URL}/usuarios/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -38,11 +53,11 @@ export async function login(email, password) {
     if (!respuesta.ok) {
         throw new Error(datos.mensaje)
     }
-    token = datos.token
+    guardarToken(datos.token)
     return datos
 }
 
 // CERRAR SESION: borra el token
 export function cerrarSesion() {
-    token = ""
+    borrarToken()
 }

@@ -19,6 +19,31 @@ import { login, registrar, estaLogueado, cerrarSesion } from "./auth.js";
 let paginaActual = 1;   /* qué página de la API ya cargamos */
 let totalPaginas = 1;   /* cuántas páginas hay en total (lo dice la API en "pagination") */
 
+// ---------- AZAR ----------
+const MAX_PAGINAS_AZAR = 1000;      /* hasta qué página sorteamos (1000 páginas de 10 = 10.000 obras) */
+const paginasVistas = new Set();    /* páginas que ya salieron (un Set no admite repetidos) */
+
+// ELIGE UNA PAGINA AL AZAR QUE TODAVIA NO HAYA SALIDO
+const paginaAlAzarNueva = () => {
+  const tope = Math.min(MAX_PAGINAS_AZAR, totalPaginas > 1 ? totalPaginas : MAX_PAGINAS_AZAR);
+  let pagina;
+  do {
+    pagina = Math.floor(Math.random() * tope) + 1;    /* un número entre 1 y el tope */
+  } while (paginasVistas.has(pagina) && paginasVistas.size < tope);   /* si ya salió, sortea de nuevo */
+  paginasVistas.add(pagina);
+  return pagina;
+};
+
+// MEZCLA UNA LISTA (algoritmo de Fisher-Yates)
+const mezclar = (lista) => {
+  const copia = [...lista];                           /* copia, para no tocar la original */
+  for (let i = copia.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));    /* una posición al azar entre 0 e i */
+    [copia[i], copia[j]] = [copia[j], copia[i]];      /* intercambia los dos elementos */
+  }
+  return copia;
+};
+
 let filtroActivo = null; //variable que "recuerda" qué filtro se eligió. null significa que no hay ninguno.
 let busquedaActiva = null;
 let obraActual = null;   //variable que recuerda que obra esta abierta/selaccionada
@@ -27,13 +52,11 @@ let obraActual = null;   //variable que recuerda que obra esta abierta/selaccion
 const cargarGaleriaInicial = async () => {
   mostrarCargando();
 
-  const paginaAlAzar = Math.floor(Math.random() * 100) + 1; /* página al azar entre 1 y 100, así cada recarga muestra obras distintas */
-
   try {
-    const respuesta = await obtenerListadoObras(paginaAlAzar);
-    renderizarGaleria(respuesta.data);
-    paginaActual = paginaAlAzar; /* arrancamos desde la página al azar, el scroll sigue cargando desde acá */
-    totalPaginas = respuesta.pagination.total_pages; /* la API nos dice cuántas páginas existen */
+    const respuesta = await obtenerListadoObras(paginaAlAzarNueva()); /* una página al azar */
+    renderizarGaleria(mezclar(respuesta.data));                       /* sus obras, mezcladas */
+    paginaActual = 1;                                                 /* cuántas páginas cargamos */
+    totalPaginas = respuesta.pagination.total_pages;                  /* la API nos dice cuántas existen */
     await llenarGaleria(); /* si las obras no llenan el ancho de la pantalla, pedimos más */
   } catch (error) {
     mostrarError("No se pudo cargar el listado inicial de obras.");
@@ -54,10 +77,10 @@ const cargarMasObras = async () => {
       respuesta = await filtrarObras(filtroActivo.campo, filtroActivo.valor, paginaActual + 1);
     } else if (busquedaActiva) {                          /* hay búsqueda: siguiente página de la búsqueda */
       respuesta = await buscarObras(busquedaActiva, paginaActual + 1);
-    } else {                                              /* ninguno: listado general */
-      respuesta = await obtenerListadoObras(paginaActual + 1);
+    } else {                                              /* ninguno: listado general, página al azar */
+      respuesta = await obtenerListadoObras(paginaAlAzarNueva());
     }
-    renderizarGaleria(respuesta.data, false); /* false = NO borrar las anteriores, agregarlas al final */
+    renderizarGaleria(mezclar(respuesta.data), false); /* mezcladas, y sin borrar las anteriores */
     paginaActual++;                          /* recién acá avanzamos, cuando la carga salió bien */
   } catch (error) {
     mostrarError("No se pudieron cargar más obras.");
