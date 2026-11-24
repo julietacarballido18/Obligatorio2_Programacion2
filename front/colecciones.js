@@ -1,35 +1,42 @@
-const colecciones = [];
-//ejemplo de objeto: { nombre: "Van Gogh", descripcion: "Mis favoritas", obras: [] }
+// Guarda en memoria las colecciones DEL USUARIO, tal como las devuelve el back.
+// Cada cambio se manda primero al back (Atlas) y después se actualiza esta copia.
+import * as api from "./api.js";
+import { getToken } from "./auth.js";
 
-export const obtenerColecciones = () => colecciones; // arrow con retorno implicito, devuelve el array de colecciones para importarlo en los otros js
+let colecciones = [];
 
+export const obtenerColecciones = () => colecciones;
+export const obtenerColeccion = (id) => colecciones.find((c) => c._id === id);
 
-//funcion CREAR COLECCION
-export const crearColeccion = (nombre, descripcion) => {
-    const existe = colecciones.some((coleccion) => coleccion.nombre === nombre); //busca si ya hay una coleccion con ese nombre
-
-    if (existe === true) {
-        return false;                                   //si ya existe no se crea otra igual
-    } else {
-        colecciones.push({ nombre, descripcion, obras: [] }); //si no existe la crea y devuelve true
-        return true;
-    }
+// PIDE AL BACK LAS COLECCIONES DEL USUARIO
+export const cargarColecciones = async () => {
+  colecciones = await api.obtenerColecciones(getToken());
 };
 
-
-//funcion AGREGAR OBRA A COLECCION
-export const agregarObraAColeccion = (nombreColeccion, obra) => {
-    const coleccion = colecciones.find((c) => c.nombre === nombreColeccion); //busco la coleccion por su nombre
-
-    const yaEsta = coleccion.obras.some((o) => o.id === obra.id); //busco por ID porque hay varias obras con el mismo nombre (untitled)
-
-    if (yaEsta === true) {
-        return false;                //si la obra ya esta guardada aca devuelve false
-    } else {
-        coleccion.obras.push(obra);   //si no esta la agrega al array con push y devuelve true
-        return true;                 
-    }
+// VACÍA LA COPIA (al cerrar sesión)
+export const vaciarColecciones = () => {
+  colecciones = [];
 };
 
-//función para buscar una colección por su nombre
-export const obtenerColeccion = (nombre) => colecciones.find((c) => c.nombre === nombre); /* devuelve la colección con ese nombre */
+// CAMBIA UNA COLECCIÓN DE LA COPIA POR LA VERSIÓN ACTUALIZADA QUE DEVOLVIÓ EL BACK
+const reemplazar = (actualizada) => {
+  colecciones = colecciones.map((c) => (c._id === actualizada._id ? actualizada : c));
+  return actualizada;
+};
+
+export const crearColeccion = async (nombre, descripcion) => {
+  const nueva = await api.crearColeccion(getToken(), { nombre, descripcion });
+  colecciones.push(nueva);
+  return nueva;
+};
+
+export const editarColeccion = async (id, datos) => reemplazar(await api.editarColeccion(getToken(), id, datos));
+
+export const borrarColeccion = async (id) => {
+  await api.borrarColeccion(getToken(), id);
+  colecciones = colecciones.filter((c) => c._id !== id);
+};
+
+export const agregarObraAColeccion = async (id, obra) => reemplazar(await api.agregarObra(getToken(), id, obra));
+export const editarComentario = async (id, idObra, comentario) => reemplazar(await api.editarComentario(getToken(), id, idObra, comentario));
+export const quitarObra = async (id, idObra) => reemplazar(await api.quitarObra(getToken(), id, idObra));

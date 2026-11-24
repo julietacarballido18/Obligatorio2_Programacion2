@@ -69,8 +69,16 @@
         <input type="email" id="login-email" autocomplete="email" />
 
         <label for="login-password">Contraseña</label>
-        <input type="password" id="login-password" autocomplete="current-password" />
-
+        <div class="campo-password">
+          <input type="password" id="login-password" autocomplete="current-password" />
+          <button type="button" class="ver-password" aria-label="Mostrar contraseña">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/>
+              <circle cx="12" cy="12" r="3"/>
+              <line class="tachado" x1="3" y1="3" x2="21" y2="21"/>
+            </svg>
+          </button>
+        </div>
         <p id="error-login" class="error-formulario" hidden></p>
 
         <button type="submit" class="boton-entrar">Entrar</button>
@@ -90,7 +98,16 @@
         <input type="email" id="registro-email" autocomplete="email" />
 
         <label for="registro-password">Contraseña (mínimo 8 caracteres)</label>
-        <input type="password" id="registro-password" autocomplete="new-password" />
+        <div class="campo-password">
+          <input type="password" id="registro-password" autocomplete="new-password" />
+          <button type="button" class="ver-password" aria-label="Mostrar contraseña">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/>
+              <circle cx="12" cy="12" r="3"/>
+              <line class="tachado" x1="3" y1="3" x2="21" y2="21"/>
+            </svg>
+          </button>
+        </div>
 
         <p id="error-registro" class="error-formulario" hidden></p>
 
@@ -180,8 +197,6 @@
           <button id="boton-agregar-coleccion" class="boton-agregar-coleccion" aria-label="Crear colección">+</button>
         </div>
         
-        </button>
-
       </section>
 
     </section>
@@ -197,6 +212,11 @@
     <div class="interior-carpeta">
       <h2 id="titulo-ver-coleccion" class="titulo-ver-coleccion"></h2>
       <p id="descripcion-ver-coleccion" class="descripcion-ver-coleccion"></p>
+            <div class="acciones-ver-coleccion">
+        <button type="button" id="boton-editar-coleccion" class="boton-categoria">Editar</button>
+        <button type="button" id="boton-borrar-coleccion" class="boton-categoria">Borrar colección</button>
+      </div>
+      <p id="error-ver-coleccion" class="error-formulario" hidden></p>
       <div id="grilla-obras-coleccion" class="grilla-obras-coleccion"></div>
     </div>
   </div>
@@ -233,7 +253,7 @@
     <div class="contenido-modal contenido-nueva-coleccion">
       <button type="button" class="cerrar-modal" id="boton-cerrar-nueva-coleccion">✕</button>
 
-      <h2 class="titulo-modal">Nueva colección</h2>
+      <h2 class="titulo-modal" id="titulo-nueva-coleccion">Nueva colección</h2>
 
       <form id="formulario-nueva-coleccion">
         <label for="campo-nombre-coleccion">Nombre</label>
@@ -244,8 +264,20 @@
 
         <p id="error-nueva-coleccion" class="error-formulario" hidden></p>
 
-        <button type="submit" class="boton-crear-coleccion">Crear colección</button>
+        <button type="submit" class="boton-crear-coleccion" id="boton-guardar-coleccion">Crear colección</button>
       </form>
+    </div>
+  </div>
+
+    <!-- ===== POP UP CONFIRMAR QUITAR OBRA ===== -->
+  <div id="modal-confirmar" class="modal" hidden>
+    <div class="contenido-modal contenido-confirmar">
+      <h2 class="titulo-modal">Quitar obra</h2>
+      <p id="texto-confirmar"></p>
+      <div class="acciones-agregar-coleccion">
+        <button type="button" id="boton-cancelar-confirmar" class="boton-secundario">Cancelar</button>
+        <button type="button" id="boton-aceptar-confirmar" class="boton-crear-coleccion">Quitar</button>
+      </div>
     </div>
   </div>
 

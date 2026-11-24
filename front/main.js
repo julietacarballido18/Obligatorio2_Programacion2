@@ -11,7 +11,7 @@ import {
   renderizarElegirColeccion,
   renderizarVerColeccion,
 } from "./render.js";
-import { crearColeccion, obtenerColecciones, agregarObraAColeccion, obtenerColeccion } from "./colecciones.js";
+import { crearColeccion, obtenerColecciones, agregarObraAColeccion, obtenerColeccion, cargarColecciones, vaciarColecciones, editarColeccion, borrarColeccion, editarComentario, quitarObra } from "./colecciones.js";
 import { login, registrar, estaLogueado, cerrarSesion } from "./auth.js";
 
 
@@ -48,13 +48,16 @@ let filtroActivo = null; //variable que "recuerda" qué filtro se eligió. null 
 let busquedaActiva = null;
 let obraActual = null;   //variable que recuerda que obra esta abierta/selaccionada
 
+// DEJA SOLO LAS OBRAS QUE TIENEN IMAGEN (para la galería de inicio)
+const conImagen = (obras) => obras.filter((obra) => obra.image_id);
+
 // ---------- CARGAR INICIAL DE GALERÍA ----------
 const cargarGaleriaInicial = async () => {
   mostrarCargando();
 
   try {
     const respuesta = await obtenerListadoObras(paginaAlAzarNueva()); /* una página al azar */
-    renderizarGaleria(mezclar(respuesta.data));                       /* sus obras, mezcladas */
+    renderizarGaleria(mezclar(conImagen(respuesta.data)));            /* sus obras, sin las que no tienen imagen, mezcladas */
     paginaActual = 1;                                                 /* cuántas páginas cargamos */
     totalPaginas = respuesta.pagination.total_pages;                  /* la API nos dice cuántas existen */
     await llenarGaleria(); /* si las obras no llenan el ancho de la pantalla, pedimos más */
@@ -80,7 +83,11 @@ const cargarMasObras = async () => {
     } else {                                              /* ninguno: listado general, página al azar */
       respuesta = await obtenerListadoObras(paginaAlAzarNueva());
     }
-    renderizarGaleria(mezclar(respuesta.data), false); /* mezcladas, y sin borrar las anteriores */
+        let obras = respuesta.data;
+    if (!filtroActivo && !busquedaActiva) {   /* solo en la galería de inicio */
+      obras = conImagen(obras);
+    }
+    renderizarGaleria(mezclar(obras), false);
     paginaActual++;                          /* recién acá avanzamos, cuando la carga salió bien */
   } catch (error) {
     mostrarError("No se pudieron cargar más obras.");
@@ -149,13 +156,20 @@ const cerrarModal = () => { /* oculta el pop up */
 };
 
 
-// POP UP NUEVA COLECCIÓN 
+// POP UP NUEVA COLECCIÓN (también se usa para EDITAR)
 const modalNuevaColeccion = document.getElementById("modal-nueva-coleccion");
 const campoNombreColeccion = document.getElementById("campo-nombre-coleccion");
 const campoDescripcionColeccion = document.getElementById("campo-descripcion-coleccion");
 const errorNuevaColeccion = document.getElementById("error-nueva-coleccion");
+const tituloNuevaColeccion = document.getElementById("titulo-nueva-coleccion");
+const botonGuardarColeccion = document.getElementById("boton-guardar-coleccion");
+
+let idEditando = null;   // null = está creando una nueva; si tiene un id = está editando esa colección
 
 const abrirNuevaColeccion = () => {
+  idEditando = null;
+  tituloNuevaColeccion.textContent = "Nueva colección";
+  botonGuardarColeccion.textContent = "Crear colección";
   campoNombreColeccion.value = "";          
   campoDescripcionColeccion.value = "";
   errorNuevaColeccion.hidden = true;        
@@ -165,8 +179,8 @@ const abrirNuevaColeccion = () => {
 const cerrarNuevaColeccion = () => {
   modalNuevaColeccion.hidden = true;
   agregarAlCrear = false;      // la próxima vez arranca sin agregar nada
+  idEditando = null;           // y sin editar nada
 };
-
 
 const botonAbrirNuevaColeccion = document.getElementById("boton-abrir-nueva-coleccion"); /* "Crear colección" del nav */
 const botonMasColeccion = document.getElementById("boton-agregar-coleccion");             /* el "+" de Mis colecciones */
@@ -177,7 +191,7 @@ botonMasColeccion.addEventListener("click", abrirNuevaColeccion);
 botonCerrarNuevaColeccion.addEventListener("click", cerrarNuevaColeccion);
 
 modalNuevaColeccion.addEventListener("click", (evento) => {
-  if (evento.target === modalNuevaColeccion) cerrarNuevaColeccion(); 
+  if (evento.target === modalNuevaColeccion) cerrarNuevaColeccion();   //click en el fondo cierra
 });
 
 //ONBOARDING: al tocar "Entrar al museo" se desliza hacia arriba y después se oculta
@@ -235,11 +249,40 @@ const entrarAlMuseo = () => {
   formularioLogin.reset();
   formularioRegistro.reset();
   pantallaAcceso.hidden = true;
-  // (acá Cande va a cargar las colecciones del usuario)
+  mostrarMisColecciones();     // trae del back las colecciones de este usuario y las dibuja
+};
+
+// PIDE AL BACK LAS COLECCIONES DEL USUARIO Y LAS DIBUJA
+const mostrarMisColecciones = async () => {
+  try {
+    await cargarColecciones();
+  } catch (error) {
+    manejarErrorColecciones(error);
+  }
+  renderizarColecciones(obtenerColecciones());
+};
+
+// SI EL TOKEN VENCIÓ (401): cierra sesión y vuelve al login. Si es otro error, lo muestra.
+const manejarErrorColecciones = (error, parrafo) => {
+  if (error.status === 401) {
+    cerrarSesion();
+    vaciarColecciones();
+    renderizarColecciones([]);
+    mostrarLogin();
+    return;
+  }
+  if (parrafo) {
+    parrafo.textContent = error.message;
+    parrafo.hidden = false;
+  } else {
+    console.error(error);
+  }
 };
 
 document.getElementById("ir-a-registro").addEventListener("click", mostrarRegistro);
 document.getElementById("ir-a-login").addEventListener("click", mostrarLogin);
+
+
 
 // LOGIN
 formularioLogin.addEventListener("submit", async (evento) => {
@@ -276,6 +319,17 @@ formularioRegistro.addEventListener("submit", async (evento) => {
   }
 });
 
+// MOSTRAR / OCULTAR CONTRASEÑA (el ojito)
+document.querySelectorAll(".ver-password").forEach((boton) => {
+  boton.addEventListener("click", () => {
+    const input = boton.previousElementSibling;          // el input que está justo antes del botón
+    const estabaOculta = input.type === "password";
+    input.type = estabaOculta ? "text" : "password";     // "text" la muestra, "password" la tapa
+    boton.classList.toggle("visible", estabaOculta);     // pone o saca la raya del ojo
+    boton.setAttribute("aria-label", estabaOculta ? "Ocultar contraseña" : "Mostrar contraseña");
+  });
+});
+
 // MENÚ DE INICIO: al tocar "Inicio" se despliega o se pliega
 const menuInicio = document.getElementById("menu-inicio");
 document.getElementById("boton-inicio").addEventListener("click", () => {
@@ -286,14 +340,15 @@ document.getElementById("boton-inicio").addEventListener("click", () => {
 document.getElementById("boton-cerrar-sesion").addEventListener("click", () => {
   menuInicio.hidden = true;                                  // cierra el menú
   cerrarSesion();                                            // borra el token
+  vaciarColecciones();                                       // borra la copia de las colecciones
+  renderizarColecciones([]);                                 // y las saca de la pantalla
   mostrarLogin();
-  // (acá Cande va a vaciar las colecciones de la pantalla)
 });
 
-//CREAR NUEVA COLECCION
+//CREAR O EDITAR COLECCION (el mismo formulario sirve para las dos cosas)
 const formularioNuevaColeccion = document.getElementById("formulario-nueva-coleccion");
 
-formularioNuevaColeccion.addEventListener("submit", (evento) => {
+formularioNuevaColeccion.addEventListener("submit", async (evento) => {
   evento.preventDefault();                                   //evita que se recargue la pagina al hacer click
 
   const nombre = campoNombreColeccion.value.trim();          //saca los espacios sobrantes 
@@ -305,26 +360,32 @@ formularioNuevaColeccion.addEventListener("submit", (evento) => {
     return;
   }
 
-  const seCreo = crearColeccion(nombre, descripcion);        
+  const estabaEditando = idEditando !== null;                // lo guardamos antes de cerrar (cerrar lo pone en null)
 
-  if (seCreo === false) {
-    errorNuevaColeccion.textContent = "Ya existe una colección con ese nombre.";  //si ya existe una coleccion con ese nombre
-    errorNuevaColeccion.hidden = false;
+  try {
+    if (estabaEditando) {
+      await editarColeccion(idEditando, { nombre, descripcion }); // PUT /colecciones/:id
+    } else {
+      await crearColeccion(nombre, descripcion);                  // POST /colecciones
+    }
+  } catch (error) {
+    manejarErrorColecciones(error, errorNuevaColeccion);     // ej: 409, ya existe una con ese nombre
     return;
   }
-  console.log("colección creada:", nombre);
 
-    if (agregarAlCrear === true) {                              // se abrió desde "Agregar a colección"
+  if (agregarAlCrear === true) {                              // se abrió desde "Agregar a colección"
     renderizarElegirColeccion(obtenerColecciones());          // redibujamos las carpetitas, ahora con la nueva
     const carpetas = document.querySelectorAll(".carpeta-elegir");
     elegirColeccion(carpetas[carpetas.length - 1]);           // dejamos seleccionada la nueva (es la última)
   }
 
+  if (estabaEditando) {
+    redibujarColeccionAbierta();                              // la carpeta abierta muestra el nombre nuevo
+  }
+
   renderizarColecciones(obtenerColecciones());
   cerrarNuevaColeccion();
-
 });
-
 ////////////////////////////////
 ///LISTENERS
 /* para no poner un click en cada obra */
@@ -334,13 +395,21 @@ formularioNuevaColeccion.addEventListener("submit", (evento) => {
 document.addEventListener("click", (evento) => {
   const carpetaColeccion = evento.target.closest(".carpeta-coleccion");  //carpeta del cajón
   if (carpetaColeccion) {
-    abrirVerColeccion(carpetaColeccion.dataset.nombre, carpetaColeccion.dataset.color);
+    abrirVerColeccion(carpetaColeccion.dataset.id, carpetaColeccion.dataset.color);
     return;
   }
 
-  const obraColeccion = evento.target.closest(".obra-coleccion");       //obra adentro de la carpeta abierta
-  if (obraColeccion) {
-    abrirDetalle(obraColeccion.dataset.id);
+ 
+
+  const botonQuitarObra = evento.target.closest(".quitar-obra");                //quitar una obra de la colección
+  if (botonQuitarObra) {
+      pedirQuitarObra(botonQuitarObra);
+    return;
+  }
+
+  const abrirObra = evento.target.closest(".abrir-obra");                       //imagen o título de una obra guardada
+  if (abrirObra) {
+    abrirDetalle(abrirObra.closest(".obra-coleccion").dataset.id);
     return;
   }
 
@@ -405,9 +474,9 @@ const elegirColeccion = (carpeta) => {
   document.querySelectorAll(".carpeta-elegir").forEach((c) => c.classList.remove("seleccionada"));
   carpeta.classList.add("seleccionada");
 
-  coleccionElegida = carpeta.dataset.nombre;
+  coleccionElegida = carpeta.dataset.id;                                    // guardamos el id (lo necesita el back)
   botonConfirmarAgregar.disabled = false;                               
-  botonConfirmarAgregar.textContent = `Agregar a ${coleccionElegida}`;  
+  botonConfirmarAgregar.textContent = `Agregar a ${carpeta.textContent}`;   // el nombre lo sacamos del texto de la carpetita
   errorAgregarColeccion.hidden = true;
 };
 
@@ -419,16 +488,14 @@ modalAgregarColeccion.addEventListener("click", (evento) => {
 
 // Confirmar: agrega la obra abierta a la colección elegida.
 // Si ya estaba, muestra el error y no cierra el pop up.
-botonConfirmarAgregar.addEventListener("click", () => {
-  const seAgrego = agregarObraAColeccion(coleccionElegida, obraActual); 
-
-  if (seAgrego === false) {
-    errorAgregarColeccion.textContent = `Esta obra ya está en ${coleccionElegida}.`;
-    errorAgregarColeccion.hidden = false;
+botonConfirmarAgregar.addEventListener("click", async () => {
+  try {
+    await agregarObraAColeccion(coleccionElegida, obraActual);
+  } catch (error) {
+    manejarErrorColecciones(error, errorAgregarColeccion);
     return;
   }
-
-  renderizarColecciones(obtenerColecciones()); // redibujamos Mis colecciones
+  renderizarColecciones(obtenerColecciones());
   cerrarAgregarColeccion();
 });
 
@@ -448,8 +515,13 @@ botonNuevaDesdeAgregar.addEventListener("click", () => {
 const modalVerColeccion = document.getElementById("modal-ver-coleccion");
 const botonCerrarVerColeccion = document.getElementById("boton-cerrar-ver-coleccion");
 
-const abrirVerColeccion = (nombre, color) => {
-  renderizarVerColeccion(obtenerColeccion(nombre), color);
+let coleccionAbierta = null;   // { id, color } de la colección que está abierta en el pop up
+
+const abrirVerColeccion = (id, color) => {
+  coleccionAbierta = { id, color };                       // la recordamos para editar, borrar, comentar y quitar
+  renderizarVerColeccion(obtenerColeccion(id), color);   // busca la colección por su id y la dibuja
+  reiniciarBorrar();                                      // el botón de borrar arranca sin confirmar
+  errorVerColeccion.hidden = true;                        // sin errores viejos
   modalVerColeccion.hidden = false;
 };
 
@@ -463,6 +535,108 @@ modalVerColeccion.addEventListener("click", (evento) => {
   if (evento.target === modalVerColeccion) cerrarVerColeccion(); //click en el fondo cierra
 });
 
+// ---------- ACCIONES DENTRO DE UNA COLECCIÓN ----------
+const errorVerColeccion = document.getElementById("error-ver-coleccion");
+const botonEditarColeccion = document.getElementById("boton-editar-coleccion");
+const botonBorrarColeccion = document.getElementById("boton-borrar-coleccion");
+
+// VUELVE A DIBUJAR LA COLECCIÓN ABIERTA Y "MIS COLECCIONES" (después de un cambio)
+const redibujarColeccionAbierta = () => {
+  renderizarVerColeccion(obtenerColeccion(coleccionAbierta.id), coleccionAbierta.color);
+  renderizarColecciones(obtenerColecciones());
+};
+
+// EDITAR: abre el pop up de nueva colección con los datos cargados
+botonEditarColeccion.addEventListener("click", () => {
+  const coleccion = obtenerColeccion(coleccionAbierta.id);
+  abrirNuevaColeccion();                                  // abre el formulario (en modo crear)...
+  idEditando = coleccion._id;                             // ...y lo pasamos a modo editar
+  campoNombreColeccion.value = coleccion.nombre;          // con los datos actuales ya escritos
+  campoDescripcionColeccion.value = coleccion.descripcion;
+  tituloNuevaColeccion.textContent = "Editar colección";
+  botonGuardarColeccion.textContent = "Guardar cambios";
+});
+
+// BORRAR: el primer click pide confirmación, el segundo borra
+const reiniciarBorrar = () => {
+  botonBorrarColeccion.classList.remove("confirmar");
+  botonBorrarColeccion.textContent = "Borrar colección";
+};
+
+botonBorrarColeccion.addEventListener("click", async () => {
+  if (!botonBorrarColeccion.classList.contains("confirmar")) {   // primer click: todavía no confirmó
+    botonBorrarColeccion.classList.add("confirmar");
+    botonBorrarColeccion.textContent = "¿Seguro? Tocá de nuevo";
+    return;
+  }
+  try {
+    await borrarColeccion(coleccionAbierta.id);               // DELETE /colecciones/:id
+  } catch (error) {
+    manejarErrorColecciones(error, errorVerColeccion);
+    return;
+  }
+  cerrarVerColeccion();
+  renderizarColecciones(obtenerColecciones());
+});
+
+// COMENTAR: se guarda solo cuando terminás de escribir y hacés click afuera del cuadro
+document.addEventListener("change", async (evento) => {
+  if (!evento.target.classList.contains("comentario-obra")) return;   // solo los comentarios
+  const tarjeta = evento.target.closest(".obra-coleccion");
+  const estado = tarjeta.querySelector(".estado-comentario");
+  try {
+    await editarComentario(coleccionAbierta.id, tarjeta.dataset.id, evento.target.value);  // PUT .../obras/:idObra
+  } catch (error) {
+    manejarErrorColecciones(error, errorVerColeccion);
+    return;
+  }
+  estado.textContent = "Comentario guardado ✓";
+  setTimeout(() => { estado.textContent = ""; }, 2000);
+});
+
+// QUITAR: la ✕ abre un pop up para confirmar
+const modalConfirmar = document.getElementById("modal-confirmar");
+const textoConfirmar = document.getElementById("texto-confirmar");
+let obraAQuitar = null;   // id de la obra que se quiere quitar, mientras el pop up está abierto
+
+const pedirQuitarObra = (boton) => {
+  const tarjeta = boton.closest(".obra-coleccion");
+  obraAQuitar = tarjeta.dataset.id;
+  const titulo = tarjeta.querySelector(".abrir-obra p").textContent;
+  textoConfirmar.textContent = `¿Querés quitar "${titulo}" de esta colección?`;
+  modalConfirmar.hidden = false;
+};
+
+const cerrarConfirmar = () => {
+  modalConfirmar.hidden = true;
+  obraAQuitar = null;
+};
+
+document.getElementById("boton-cancelar-confirmar").addEventListener("click", cerrarConfirmar);
+modalConfirmar.addEventListener("click", (evento) => {
+  if (evento.target === modalConfirmar) cerrarConfirmar();   // click en el fondo cancela
+});
+
+document.getElementById("boton-aceptar-confirmar").addEventListener("click", async () => {
+  try {
+    await quitarObra(coleccionAbierta.id, obraAQuitar);      // DELETE .../obras/:idObra
+  } catch (error) {
+    cerrarConfirmar();
+    manejarErrorColecciones(error, errorVerColeccion);
+    return;
+  }
+  cerrarConfirmar();
+  redibujarColeccionAbierta();                                // la tarjeta desaparece
+});
+
+// ---------- VOLVER AL INICIO: galería nueva, sin búsqueda ni filtro ----------
+const volverAlInicio = () => {
+  filtroActivo = null;           // apaga el filtro, si había
+  busquedaActiva = null;         // apaga la búsqueda, si había
+  campoBusqueda.value = "";      // vacía el buscador
+  galeria.scrollLeft = 0;        // la galería vuelve al principio (a la izquierda)
+  cargarGaleriaInicial();        // pide una tanda nueva de obras al azar
+};
 
 // ---------- NAV: INICIO Y MIS COLECCIONES ----------
 /* Los dos botones del nav con data-vista mueven la página hasta su sección. */
@@ -471,8 +645,9 @@ const seccionColecciones = document.querySelector(".seccion-colecciones");
 
 botonesVista.forEach((boton) => {
   boton.addEventListener("click", () => {
-    if (boton.dataset.vista === "explorar") {
+      if (boton.dataset.vista === "explorar") {
       window.scrollTo({ top: 0, behavior: "smooth" }); /* sube hasta arriba de todo, con animación suave */
+      volverAlInicio();                                /* y recarga la galería con obras nuevas */
     } else if (boton.dataset.vista === "colecciones") {
       seccionColecciones.scrollIntoView({ behavior: "smooth", block: "start" }); /* baja hasta que la sección quede arriba de la pantalla */
     }
@@ -535,4 +710,9 @@ const llenarGaleria = async () => {
 // ---------- Arranque ----------
 cargarGaleriaInicial();
 renderizarMenuFiltros();
-renderizarColecciones(obtenerColecciones());
+
+if (estaLogueado()) {
+  mostrarMisColecciones();     // si ya había sesión (por ejemplo, después de un F5), trae sus colecciones del back
+} else {
+  renderizarColecciones([]);   // si no, "Mis colecciones" arranca vacío
+}

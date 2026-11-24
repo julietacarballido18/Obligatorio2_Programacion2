@@ -21,7 +21,7 @@ const crearSinImagen = (obra, texto) => {
 };
 
 const crearImagenObra = (obra, clase = "") => { /* Crea la imagen de una obra. Si la real falla, usa la miniatura borrosa de la API. */
-  const urlImagen = construirUrlImagen(obra.image_id, obra.thumbnail?.width);
+  const urlImagen = construirUrlImagen(obra.image_id, obra.thumbnail?.width); /* por nuestro back */
   const respaldo = obra.thumbnail?.lqip; /* miniatura borrosa de respaldo */
 
   if (!urlImagen && !respaldo) { /* sin imagen ni miniatura: recuadro con el color de la obra */
@@ -168,7 +168,7 @@ export const renderizarColecciones = (colecciones) => {
     //Para cuestiones de estilo: 4 posibles posiciones para la parte de la pestaña de la carpeta, para que no queden todas iguales
     carpeta.className = `carpeta-coleccion posicion-${indice % 4} color-${indice % 6}`;
 
-    carpeta.dataset.nombre = coleccion.nombre;    //para saber que colección abrir al hacer click
+    carpeta.dataset.id = coleccion._id;   //para saber que colección abrir al hacer click
 
     carpeta.dataset.color = indice % 6;            //para que la carpeta abierta tenga el mismo color
 
@@ -205,7 +205,7 @@ export const renderizarElegirColeccion = (colecciones) => {
     carpeta.type = "button";
     carpeta.className = "carpeta-elegir";
     carpeta.textContent = coleccion.nombre;
-    carpeta.dataset.nombre = coleccion.nombre;       //carga dinamica del nombre de las colecciones
+    carpeta.dataset.id = coleccion._id;      //carga dinamica del nombre de las colecciones
     grillaElegirColeccion.appendChild(carpeta);
   });
 };
@@ -235,13 +235,39 @@ export const renderizarVerColeccion = (coleccion, color) => {
   coleccion.obras.forEach((obra, indice) => {        //una tarjetita por obra guardada
     const tarjeta = document.createElement("article");
     tarjeta.className = "obra-coleccion";
-    tarjeta.dataset.id = obra.id;                    //para abrir su detalle al hacer click
+    tarjeta.dataset.id = obra.id;                    //id de la obra (para el detalle, comentar y quitar)
     tarjeta.style.setProperty("--orden", indice);    //para que aparezcan una después de la otra (CSS)
 
+    // cruz para quitar la obra (arriba a la derecha)
+    const quitar = document.createElement("button");
+    quitar.type = "button";
+    quitar.className = "quitar-obra";
+    quitar.setAttribute("aria-label", "Quitar obra de la colección");
+    quitar.textContent = "✕";
+
+    // imagen + título: al tocarlos se abre el detalle
+    const abrir = document.createElement("div");
+    abrir.className = "abrir-obra";
     const titulo = document.createElement("p");
     titulo.textContent = obra.title ?? "Sin título";
+    abrir.append(crearImagenObra(obra), titulo);
 
-    tarjeta.append(crearImagenObra(obra), titulo);   //reusa la función de imágenes de la galería
+    // autor y año
+    const datos = document.createElement("p");
+    datos.className = "datos-obra";
+    datos.textContent = [obra.artist_display, obra.date_display].filter(Boolean).join(" · ");
+
+    // comentario: se guarda solo al salir del cuadro de texto
+    const comentario = document.createElement("textarea");
+    comentario.className = "comentario-obra";
+    comentario.placeholder = "Agregá un comentario…";
+    comentario.value = obra.comentario ?? "";
+
+    // aviso de "guardado" (vacío hasta que se guarda)
+    const estado = document.createElement("p");
+    estado.className = "estado-comentario";
+
+    tarjeta.append(quitar, abrir, datos, comentario, estado);
     grillaObrasColeccion.appendChild(tarjeta);
   });
 };

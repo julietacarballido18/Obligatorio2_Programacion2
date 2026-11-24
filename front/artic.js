@@ -19,11 +19,21 @@ const PROXY_IMAGENES = PROXY_LOCAL;
 const IMAGENES_URL = PROXY_IMAGENES || "https://www.artic.edu";
 
 // ---------- PEDIDO A LA API ----------
-/* Sin Referer y con la cabecera con la que AIC pide identificarse.
-   Si la consola muestra un error de CORS, sacar el objeto headers y dejar solo referrerPolicy. */
-const pedir = (url) => fetch(url, {
-  referrerPolicy: "no-referrer"
-});
+/* Primero le pedimos a nuestro back. Si responde 429 (el museo lo frenó por demasiados pedidos),
+   probamos pedírselo directo al museo desde el navegador. */
+const MUSEO_API = "https://api.artic.edu/api/v1";
+
+const pedir = async (url) => {
+  const respuesta = await fetch(url, { referrerPolicy: "no-referrer" });
+  if (respuesta.status !== 429) return respuesta;      /* salió bien (u otro error): la devolvemos como siempre */
+
+  const directa = url.replace(BASE_URL, MUSEO_API);    /* la misma dirección, pero apuntando al museo */
+  try {
+    return await fetch(directa, { referrerPolicy: "no-referrer" });
+  } catch (error) {
+    return respuesta;                                  /* si el museo tampoco responde, devolvemos el 429 original */
+  }
+};
 
 // ---------- ARMAR URL IMAGEN A PARTIR DEL ID ----------
 export const construirUrlImagen = (imageId, anchoOriginal) => {
@@ -36,7 +46,7 @@ export const construirUrlImagen = (imageId, anchoOriginal) => {
 
 // ---------- LISTADO GENERAL DE OBRAS ----------
 export const obtenerListadoObras = async (page = 1) => {
-  const url = `${BASE_URL}/artworks?page=${page}&limit=10&fields=${LIST_FIELDS}`; /* limit=10: 10 obras por página */
+  const url = `${BASE_URL}/artworks?page=${page}&limit=30&fields=${LIST_FIELDS}`; /* limit=10: 10 obras por página */
   const respuesta = await pedir(url);
 
   if (!respuesta.ok) {
@@ -62,7 +72,7 @@ export const obtenerDetalleObra = async (id) => {
 // ---------- BÚSQUEDA POR TEXTO ----------
 export const buscarObras = async (texto, page = 1) => {
   const textoSeguro = encodeURIComponent(texto); /* pasa espacios, tildes y símbolos a un formato seguro para la URL */
-  const url = `${BASE_URL}/artworks/search?q=${textoSeguro}&page=${page}&fields=${LIST_FIELDS}`;
+  const url = `${BASE_URL}/artworks/search?q=${textoSeguro}&page=${page}&limit=30&fields=${LIST_FIELDS}`;
   const respuesta = await pedir(url);
 
   if (!respuesta.ok) {
@@ -75,7 +85,7 @@ export const buscarObras = async (texto, page = 1) => {
 // ---------- FILTRO PREESTABLECIDO ----------
 export const filtrarObras = async (campo, valor, page = 1) => {
   const valorSeguro = encodeURIComponent(valor); // encodeURI convierte un texto a un formato que se puede poner dentro de una URL sin romperla
-  const url = `${BASE_URL}/artworks/search?query[term][${campo}]=${valorSeguro}&page=${page}&limit=10&fields=${LIST_FIELDS}`;
+  const url = `${BASE_URL}/artworks/search?query[term][${campo}]=${valorSeguro}&page=${page}&limit=30&fields=${LIST_FIELDS}`;
   const respuesta = await pedir(url);
 
   if (!respuesta.ok) {
