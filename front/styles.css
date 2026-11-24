@@ -1,3 +1,27 @@
+/* =========================================================
+   MUSEO PERSONAL · ESTILOS
+   ---------------------------------------------------------
+   1.  Base: reset, variables, tipografía y botones generales
+   2.  Paleta de colores de las carpetas
+   3.  Header: logo, nav, menús y buscador
+   4.  Galería de obras
+   5.  Mis colecciones (el cajón)
+   6.  Pop ups: estilos comunes
+   7.  Pop up detalle de obra
+   8.  Pop up nueva / editar colección
+   9.  Pop up agregar a colección
+   10. Pop up ver colección (carpeta abierta)
+   11. Pop up confirmar
+   12. Onboarding (bienvenida)
+   13. Acceso: login y registro
+   14. Gestos con el dedo
+   15. Responsive: tablet (820px), celular grande (700px) y celular (600px)
+   ========================================================= */
+
+
+/* =========================================================
+   1. BASE
+   ========================================================= */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -13,27 +37,37 @@
   --color-accent: #2a2a2a;
   --radius: 10px;
   --gap: 1rem;
-  --alto-header: 100px;                    /* CAMBIO: antes 90px (nav más grande). La galería lo resta */
+  --alto-header: 100px;                    /* alto del header: la galería lo resta */
 
-  /* TIPOGRAFÍAS (CAMBIO): solo dos en todo el sitio */
+  /* Solo dos tipografías en todo el sitio */
   --fuente-titulos: "Inter Tight", Arial, sans-serif;            /* títulos */
   --fuente-texto: "Space Mono", "Courier New", monospace;        /* textos chicos, nav, botones */
 }
 
+/* La página nunca se desliza para los costados: lo que se pase del ancho se recorta.
+   La galería sigue scrolleando para el costado porque tiene su propio scroll.
+   (clip y no hidden: hidden rompería el header pegado arriba) */
+html,
 body {
-  font-family: var(--fuente-texto);        /* CAMBIO: todo usa Space Mono salvo los títulos */
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+body {
+  font-family: var(--fuente-texto);        /* todo usa Space Mono, salvo los títulos */
   background: var(--color-bg);
   color: var(--color-text);
   line-height: 1.4;
 }
 
-/* CAMBIO: todos los títulos con Inter Tight regular */
+/* Todos los títulos con Inter Tight regular */
 h2 {
   font-family: var(--fuente-titulos);
   font-weight: 400;
 }
 
-button { /* btn de añadir a carpeta, dentro del modal */
+/* Botón general (cada botón después ajusta lo suyo) */
+button {
   font: inherit;
   cursor: pointer;
   border: none;
@@ -55,31 +89,86 @@ input[type="text"] {
   border-radius: var(--radius);
 }
 
-/* =====  HEADER y NAV (según el prototipo) ===== */
-/* ----- Logo: mini abanico de carpetas, en la columna izquierda del header ----- */
+main {
+  width: 100%;                             /* la galería ocupa todo el ancho de la pantalla */
+}
+
+.vista[hidden] {
+  display: none;
+}
+
+/* Animación compartida: aparece subiendo un poquito
+   (la usan las obras de la carpeta abierta y el onboarding) */
+@keyframes aparecer-obra {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+/* =========================================================
+   2. PALETA DE LAS CARPETAS
+   Cada clase guarda su color en una variable que usan las carpetas.
+   ========================================================= */
+.color-0 { --color-carpeta: #FAF8D4; }   /* crema */
+.color-1 { --color-carpeta: #EBDCCB; }   /* beige */
+.color-2 { --color-carpeta: #c3baaa; }   /* gris tierra */
+.color-3 { --color-carpeta: #91818A; }   /* malva oscuro */
+.color-4 { --color-carpeta: #B2A3B5; }   /* lavanda */
+.color-5 { --color-carpeta: #a891ad; }   /* lila */
+
+
+/* =========================================================
+   3. HEADER
+   ========================================================= */
+.encabezado {
+  --margen-lateral: 2rem;                  /* margen a los costados */
+
+  /* Grilla de 3 columnas: [logo | nav | buscador].
+     Las de los costados miden lo mismo (1fr), así el nav queda centrado en la pantalla. */
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 1.5rem;
+  height: var(--alto-header);
+  padding: 0 var(--margen-lateral);
+  background: #ffffff;
+
+  /* Fijo: al bajar se queda pegado arriba de la pantalla */
+  position: sticky;
+  top: 0;
+  z-index: 50;                             /* encima de la galería, debajo de los pop ups (100) */
+}
+
+/* ----- Logo: mini abanico de carpetas ----- */
 .logo {
   grid-column: 1;
   justify-self: start;
-  align-self: center;                      /* centrado en vertical dentro del header */
+  align-self: center;
   position: relative;
-  width: 90px;                             /* antes 64px */
-  height: 56px;                            /* antes 44px: justo el alto del dibujo, así se centra bien */
-  margin: 0 0 0 1.5rem;                    /* aire a la izquierda (y anula el margin-top: 25px de los botones) */
-  padding: 0;                              /* anula los estilos generales de button */
+  width: 90px;
+  height: 56px;                            /* justo el alto del dibujo, así se centra bien */
+  margin: 0 0 0 1.5rem;                    /* aire a la izquierda (y anula el margin-top de los botones) */
+  padding: 0;
   background: none;
   border-radius: 0;
 }
 
 .logo:hover {
-  opacity: 1;                              /* anula el opacity: 0.85 del hover general */
+  opacity: 1;                              /* anula el hover general de los botones */
 }
 
 .carpeta-logo {
   position: absolute;
   bottom: 0;
   left: 50%;
-  width: 56px;                             /* antes 40px */
-  height: 40px;                            /* antes 28px */
+  width: 56px;
+  height: 40px;
   margin-left: -28px;                      /* la mitad del ancho: queda centrada */
   background: var(--color-carpeta);
   border: 1px solid #000;
@@ -89,13 +178,14 @@ input[type="text"] {
   transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
+/* Pestaña de cada carpetita */
 .carpeta-logo::before {
   content: "";
   position: absolute;
   bottom: 100%;
   left: -1px;
   width: 45%;
-  height: 8px;                             /* antes 6px */
+  height: 8px;
   margin-bottom: -1px;
   background: var(--color-carpeta);
   border: 1px solid #000;
@@ -111,43 +201,23 @@ input[type="text"] {
 .logo:hover .carpeta-logo.izquierda { --giro: -24deg; }
 .logo:hover .carpeta-logo.derecha   { --giro: 24deg; }
 
-.encabezado {
-  --margen-lateral: 2rem;                  /* margen a los costados: el buscador queda cerca del borde derecho */
-
-  /* Grilla de 3 columnas: [vacía | nav | buscador].
-     Las de los costados miden lo mismo (1fr), así la del medio queda centrada en la pantalla. */
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  gap: 1.5rem;
-  height: var(--alto-header);
-  padding: 0 var(--margen-lateral);
-  background: #ffffff;
-  /* CAMBIO: se sacó font-family, ahora la hereda del body */
-
-  /* Header fijo: al bajar se queda pegado arriba de la pantalla */
-  position: sticky;
-  top: 0;                                  /* se "pega" cuando su borde de arriba llega al borde de la pantalla */
-  z-index: 50;                             /* queda por encima de la galería, pero debajo del modal (100) */
-}
-
-/* Botones pegados entre sí, como una sola barra */
+/* ----- Nav: botones pegados entre sí, como una sola barra ----- */
 .nav-principal {
   display: flex;
   grid-column: 2;                          /* columna del medio */
 }
 
 .boton-nav {
-  min-width: 150px;                        /* CAMBIO: antes 120px */
-  margin: 0;                               /* anula el margin-top general de los botones */
+  min-width: 150px;
+  margin: 0;                               /* anula el margin-top de los botones */
   margin-left: -1px;                       /* pisa el borde del vecino: no quedan bordes dobles */
-  padding: 0.65rem 1.2rem;                 /* CAMBIO: antes 0.45rem 0.9rem */
+  padding: 0.65rem 1.2rem;
   border: 1px solid #000;
-  border-radius: 0;                        /* esquinas rectas */
+  border-radius: 0;
   background: #ffffff;
   color: #000;
   font-family: inherit;
-  font-size: 0.9rem;                       /* CAMBIO: antes 0.8rem */
+  font-size: 0.9rem;
   font-weight: 700;
   white-space: nowrap;
 }
@@ -166,14 +236,97 @@ input[type="text"] {
   color: #ffffff;
 }
 
-/* Buscador: sin caja, solo una línea abajo */
+/* ----- Menú de Inicio (Cerrar sesión) ----- */
+.contenedor-inicio {
+  position: relative;                      /* el menú se ubica respecto a este botón */
+}
+
+.menu-inicio {
+  position: absolute;
+  top: 100%;                               /* justo debajo de "Inicio" */
+  left: 0;
+  width: 100%;                             /* mismo ancho que el botón */
+}
+
+.menu-inicio[hidden] {
+  display: none;
+}
+
+.menu-inicio .boton-categoria {
+  margin-top: -1px;                        /* pisa el borde de "Inicio": no queda borde doble */
+}
+
+/* ----- Menú de Filtros ----- */
+.contenedor-filtros {
+  position: relative;
+  margin-left: -2px;
+}
+
+.menu-filtros {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  display: flex;
+  align-items: flex-start;
+}
+
+.menu-filtros[hidden] {
+  display: none;
+}
+
+.lista-categorias,
+.lista-opciones {
+  list-style: none;                        /* saca los puntitos */
+}
+
+.lista-categorias { width: 150px; }
+.lista-opciones   { width: 180px; margin-left: -2px; }
+
+.lista-categorias li,
+.lista-opciones li {
+  margin-top: -2px;                        /* pisa el borde del de arriba: no quedan bordes dobles */
+}
+
+/* Botones de los menús (también "Editar" y "Borrar colección") */
+.boton-categoria,
+.boton-opcion {
+  width: 100%;                             /* todos los de una columna miden lo mismo */
+  margin: 0;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid #000;
+  border-radius: 0;
+  background: #fff;
+  color: #000;
+  font-size: 0.85rem;
+}
+
+.boton-categoria:hover,
+.boton-opcion:hover,
+.boton-categoria.activo {
+  opacity: 1;
+  background: #000;
+  color: #fff;
+}
+
+/* ----- Buscador: sin caja, solo una línea abajo ----- */
+.barra-busqueda {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.barra-busqueda input {
+  flex: 1;
+}
+
 .encabezado .barra-busqueda {
   display: flex;
   align-items: center;
   gap: 0.6rem;
   margin-bottom: 0;
   grid-column: 3;                          /* columna de la derecha */
-  justify-self: end;                       /* pegado al borde derecho de su columna */
+  justify-self: end;                       /* a la derecha */
+  margin-right: 2rem;                      /* mismo margen que las carpetas del logo a la izquierda */
   width: 205px;
   max-width: 100%;
   padding: 0.3rem 0;
@@ -202,59 +355,11 @@ input[type="text"] {
   width: 18px;
   height: 18px;
   flex-shrink: 0;                          /* que la lupa no se achique */
-  fill: none;                              /* solo contorno, como en el prototipo */
+  fill: none;                              /* solo contorno */
   stroke: #000;
   stroke-width: 2;
   stroke-linecap: round;
 }
-
-/* En pantallas angostas: nav arriba y buscador abajo */
-@media (max-width: 820px) {
-  :root {
-    --alto-header: 120px;
-  }
-
-  .encabezado {
-    grid-template-columns: 1fr;            /* una sola columna: todo apilado y centrado */
-    justify-items: center;
-    align-content: center;
-    gap: 0.75rem;
-  }
-
-  .nav-principal,
-  .encabezado .barra-busqueda {
-    grid-column: 1;
-    justify-self: center;
-  }
-
-  .boton-nav {
-    min-width: 0;
-    font-size: 0.7rem;
-    padding: 0.4rem 0.6rem;
-  }
-}
-
-/* =====  VISTAS -> NAV ===== */
-main {
-  width: 100%; /* la galería ocupa todo el ancho de la pantalla */
-}
-
-.vista[hidden] {
-  display: none;
-}
-
-/* =====  BUSCADOR ===== */
-.barra-busqueda {
-  display: flex;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-}
-
-.barra-busqueda input {
-  flex: 1;
-}
-
-/* CAMBIO: se sacaron .barra-filtros y .boton-filtro, ya no existen en el HTML */
 
 .estado-activo {
   margin-bottom: 1rem;
@@ -262,75 +367,28 @@ main {
   font-size: 0.9rem;
 }
 
-/* ===== MENÚ DE FILTROS ===== */
-.contenedor-filtros {
-  position: relative;
-  margin-left: -2px;
-}
 
-.menu-filtros {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  display: flex;
-  align-items: flex-start;
-}
-
-.menu-filtros[hidden] {
-  display: none;
-}
-
-.lista-categorias,
-.lista-opciones {
-  list-style: none;              /* saca los puntitos */
-}
-
-.lista-categorias { width: 150px; }       /* CAMBIO: antes 130px, acompaña al nav */
-.lista-opciones   { width: 180px;          /* CAMBIO: antes 150px */ margin-left: -2px; }
-
-.lista-categorias li,
-.lista-opciones li {
-  margin-top: -2px;              /* pisa el borde del de arriba: no quedan bordes dobles */
-}
-
-.boton-categoria,
-.boton-opcion {
-  width: 100%;                   /* todos los botones de una columna miden lo mismo */
-  margin: 0;                     /* anula el margin-top: 25px general de los botones */
-  padding: 0.6rem 0.8rem;        /* CAMBIO: antes 0.45rem 0.6rem */
-  border: 1px solid #000;
-  border-radius: 0;              /* esquinas rectas */
-  background: #fff;
-  color: #000;
-  font-size: 0.85rem;            /* CAMBIO: antes 0.8rem */
-}
-
-.boton-categoria:hover,
-.boton-opcion:hover,
-.boton-categoria.activo {
-  opacity: 1;                    /* anula el "medio transparente" del hover general */
-  background: #000;
-  color: #fff;
-}
-
-/* =====  GALERÍA DE OBRAS (mosaico con scroll horizontal) ===== */
-/* Grilla de 3 filas de alto fijo. Las obras se van ubicando columna por columna, así que la galería crece hacia la derecha y el borde de abajo queda parejo. */
+/* =========================================================
+   4. GALERÍA DE OBRAS (mosaico con scroll horizontal)
+   Grilla de 3 filas de alto fijo. Las obras se ubican columna por columna,
+   así la galería crece hacia la derecha y el borde de abajo queda parejo.
+   ========================================================= */
 .galeria-obras {
-    background: #fff;                               /* fondo blanco: los huecos y las separaciones quedan del color de la página */
+  background: #fff;
   --separacion: 1px;
-  --barra: 12px;                                  /* espacio reservado para la barra de desplazamiento */
-  --alto-galeria: calc(100vh - var(--alto-header) - var(--barra)); /* alto de la pantalla menos el header y la barra */
-  --celda: calc((var(--alto-galeria) - 2 * var(--separacion)) / 3); /* tamaño de cada celda*/
+  --barra: 12px;                                  /* espacio para la barra de desplazamiento */
+  --alto-galeria: calc(100vh - var(--alto-header) - var(--barra)); /* pantalla menos header y barra */
+  --celda: calc((var(--alto-galeria) - 2 * var(--separacion)) / 3); /* tamaño de cada celda */
 
   display: grid;
-  height: calc(var(--alto-galeria) + var(--barra)); /* la caja es más alta que las filas: la barra entra abajo sin tapar obras */
+  height: calc(var(--alto-galeria) + var(--barra)); /* la barra entra abajo sin tapar obras */
   grid-template-rows: repeat(3, var(--celda));
   grid-auto-columns: var(--celda);
   grid-auto-flow: column dense;
   gap: var(--separacion);
   overflow-x: auto;
   overflow-y: hidden;
-  overscroll-behavior-x: contain;                 /* evita que el gesto de trackpad haga "atrás" en el navegador */
+  overscroll-behavior-x: contain;                 /* el gesto del trackpad no hace "atrás" en el navegador */
   scrollbar-width: thin;                          /* Firefox: barra finita */
   scrollbar-color: var(--color-text-soft) transparent;
 }
@@ -343,7 +401,7 @@ main {
 .galeria-obras::-webkit-scrollbar-thumb {
   background: var(--color-text-soft);
   border-radius: 999px;
-  border: 3px solid var(--color-bg);              /* el borde del color de fondo hace que se vea más fina */
+  border: 3px solid var(--color-bg);              /* el borde del color de fondo la hace más fina */
 }
 
 .galeria-obras::-webkit-scrollbar-track {
@@ -353,15 +411,15 @@ main {
 .tarjeta-obra {
   cursor: pointer;
   overflow: hidden;
-  position: relative;   /* el título (absolute) se ubica respecto a la tarjeta */
+  position: relative;                             /* el título se ubica respecto a la tarjeta */
 }
 
-/* Tamaños del mosaico: cada obra ocupa 1 celda, o 2 de ancho, 2 de alto, o 2x2 */
+/* Tamaños del mosaico: 1 celda, 2 de ancho, 2 de alto o 2x2 */
 .tarjeta-obra.ancha  { grid-column: span 2; }
 .tarjeta-obra.alta   { grid-row: span 2; }
 .tarjeta-obra.grande { grid-column: span 2; grid-row: span 2; }
 
-/* la imagen llena toda su celda*/
+/* La imagen llena toda su celda */
 .tarjeta-obra img,
 .tarjeta-obra .sin-imagen {
   width: 100%;
@@ -373,17 +431,17 @@ main {
 }
 
 .tarjeta-obra:hover img {
-  transform: scale(1.1); /* pequeño zoom al pasar el mouse, para que se note que es clickeable */
+  transform: scale(1.1);                          /* zoom al pasar el mouse: se nota que es clickeable */
 }
 
 /* Título de la obra: caja negra abajo a la izquierda */
 .titulo-tarjeta {
-  position: absolute;               /* se despega del flujo y queda encima de la imagen */
+  position: absolute;
   left: 0;
-  bottom: 0;                        /* pegado a la esquina de abajo a la izquierda */
-  max-width: 100%;                  /* nunca más ancha que la tarjeta */
+  bottom: 0;
+  max-width: 100%;
   padding: 0.4rem 0.7rem;
-  background: #1a1a1ac4;                 /* caja negra rellena */
+  background: #1a1a1ac4;
   color: #fff;
   font-family: var(--fuente-texto);
   font-weight: 400;
@@ -391,17 +449,18 @@ main {
   letter-spacing: 0.01em;
   white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;          /* títulos largos terminan en "..." */
-  pointer-events: none;             /* el click atraviesa el texto y llega a la tarjeta */
+  text-overflow: ellipsis;                        /* títulos largos terminan en "..." */
+  pointer-events: none;                           /* el click atraviesa el texto y llega a la tarjeta */
 }
 
-/* ===========================================================
-   CEL
-   =========================================================== */
-
-@media (max-width: 600px) {
-  .galeria-obras { --alto-galeria: 70vh; 
-  }
+/* Recuadro para obras sin imagen (se pinta con el color de la obra desde el JS) */
+.sin-imagen {
+  aspect-ratio: 4 / 3;
+  display: grid;
+  place-items: center;
+  background: var(--color-border);
+  color: var(--color-text-soft);
+  font-size: 0.8rem;
 }
 
 .estado-galeria {
@@ -410,11 +469,14 @@ main {
   text-align: center;
 }
 
-/* =====  MIS COLECCIONES ===== */
+
+/* =========================================================
+   5. MIS COLECCIONES (el cajón)
+   ========================================================= */
 .seccion-colecciones {
   max-width: 1100px;                                  /* ancho máximo del cajón */
   margin: 4rem auto 3rem;                             /* auto a los costados: lo centra */
-  padding: 0 2rem;                                    /* margen mínimo en pantallas chicas */
+  padding: 0 2rem;
   scroll-margin-top: calc(var(--alto-header) + 1rem); /* que el header fijo no la tape */
 }
 
@@ -428,7 +490,7 @@ main {
   position: relative;                  /* las paredes se ubican respecto al cajón */
   display: flex;
   flex-direction: column;
-  padding: 2.5rem 3rem 0;              /* arriba: lugar para la primera pestaña; costados: aire entre pared y carpetas */
+  padding: 2.5rem 3rem 0;              /* arriba: lugar para la primera pestaña; costados: aire */
 }
 
 .pila-colecciones::before,
@@ -464,7 +526,7 @@ main {
 /* ----- El frente del cajón, con el + adentro ----- */
 .frente-cajon {
   position: relative;
-  z-index: 2;                          /* por encima de las carpetas: tapa la parte de abajo de la de adelante */
+  z-index: 2;                          /* tapa la parte de abajo de la carpeta de adelante */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -488,14 +550,13 @@ main {
   padding: 0;
 }
 
-
-/* ----- El cuerpo de cada carpeta ----- */
+/* ----- Cada carpeta ----- */
 .carpeta-coleccion {
   position: relative;                  /* la pestaña se ubica respecto a la carpeta */
-  align-self: center;                  /* centrada: el achique de ancho se reparte a los dos lados */
+  align-self: center;
   height: 240px;
   margin-top: -200px;                  /* se sube sobre la anterior: se ven 40px de cada una */
-  border: 1px solid #000;              /* CAMBIO: había dos border, quedó uno */
+  border: 1px solid #000;
   border-radius: 8px;
   background: var(--color-carpeta);    /* el color lo define la clase color-X */
   cursor: pointer;
@@ -525,46 +586,44 @@ main {
   }
 }
 
-/* ----- La pestaña ----- */
-.pestana-carpeta {
-  position: absolute;
-  bottom: 100%;                        /* apoyada justo encima del cuerpo */
-  margin-bottom: -1px;                 /* baja 1px y tapa la línea del cuerpo */
-  padding: 0.3rem 1.2rem;
-  background: var(--color-carpeta);    /* mismo color que su carpeta */
-  border: 1px solid #000;
-  border-bottom: none;                 /* abierta abajo: se une al cuerpo */
-  border-radius: 8px 8px 0 0;          /* puntas de arriba redondeadas */
-  color: #000;                         /* texto negro: se lee sobre colores claros */
-  font-size: 0.8rem;
-  font-weight: 400;
-  white-space: nowrap;
-}
-
-/* ----- Dónde va la pestaña según la posición ----- */
-.posicion-0 .pestana-carpeta { left: 5%; }
-.posicion-1 .pestana-carpeta { left: 52%; }
-.posicion-2 .pestana-carpeta { left: 30%; }
-.posicion-3 .pestana-carpeta { left: 70%; }
-
-/* ----- Paleta: cada clase guarda su color en una variable ----- */
-.color-0 { --color-carpeta: #FAF8D4; }   /* crema */
-.color-1 { --color-carpeta: #EBDCCB; }   /* beige */
-.color-2 { --color-carpeta: #c3baaa; }   /* gris tierra */
-.color-3 { --color-carpeta: #91818A; }   /* malva oscuro */
-.color-4 { --color-carpeta: #B2A3B5; }   /* lavanda */
-.color-5 { --color-carpeta: #a891ad; }   /* lila */
-
-/* ----- Hover: se levanta, se ilumina y se abre un hueco para ver el interior ----- */
+/* Hover: se levanta, se ilumina y se abre un hueco para ver el interior */
 .carpeta-coleccion:hover {
   transform: translateY(-16px);
   filter: brightness(1.15);
 }
 
 .carpeta-coleccion:hover + .carpeta-coleccion {
-  margin-top: -80px;                   /* la siguiente se sube menos: las de adelante bajan */
+  margin-top: -80px;                   /* la siguiente se sube menos */
 }
-/* =====  POP UP DETALLE ===== */
+
+/* ----- La pestaña ----- */
+.pestana-carpeta {
+  position: absolute;
+  bottom: 100%;                        /* apoyada justo encima del cuerpo */
+  margin-bottom: -1px;                 /* tapa la línea del cuerpo */
+  padding: 0.3rem 1.2rem;
+  background: var(--color-carpeta);
+  border: 1px solid #000;
+  border-bottom: none;                 /* abierta abajo: se une al cuerpo */
+  border-radius: 8px 8px 0 0;
+  color: #000;
+  font-size: 0.8rem;
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+/* Dónde va la pestaña según la posición */
+.posicion-0 .pestana-carpeta { left: 5%; }
+.posicion-1 .pestana-carpeta { left: 52%; }
+.posicion-2 .pestana-carpeta { left: 30%; }
+.posicion-3 .pestana-carpeta { left: 70%; }
+
+
+/* =========================================================
+   6. POP UPS: ESTILOS COMUNES
+   Bordes rectos, blanco y negro, misma ✕.
+   (La carpeta abierta tiene su propio estilo, en la sección 10.)
+   ========================================================= */
 .modal {
   position: fixed;
   inset: 0;
@@ -580,18 +639,16 @@ main {
   display: none;
 }
 
-/* CAMBIO: estilo común a TODOS los pop ups (detalle, nueva colección, agregar a colección):
-   bordes rectos, blanco y negro, misma ✕. La carpeta abierta tiene su propio estilo más abajo. */
 .contenido-modal {
   background: #fff;
   color: #000;
   border: 1px solid #000;
-  border-radius: 0;                        /* CAMBIO: esquinas rectas */
-  max-width: 1100px;                       /* CAMBIO: antes 1000px, más lugar para el texto del detalle */
+  border-radius: 0;
+  max-width: 1100px;
   width: 100%;
   max-height: 92vh;
-  overflow-y: auto;                        /* solo respaldo: en pantallas muy chicas */
-  padding: 2rem 2.5rem 2.5rem;             /* CAMBIO: mismo padding en todos */
+  overflow-y: auto;                        /* respaldo para pantallas muy chicas */
+  padding: 2rem 2.5rem 2.5rem;
   position: relative;
 }
 
@@ -599,157 +656,22 @@ main {
   position: absolute;
   top: 1.5rem;
   right: 1.5rem;
-  margin-top: 0;                           /* anula el margin-top general de los botones */
+  margin-top: 0;
   padding: 0;
   border-radius: 0;
-  background: transparent;                 /* CAMBIO: ✕ sin fondo gris, igual en todos */
+  background: transparent;
   color: #000;
   font-size: 1.4rem;
   line-height: 1;
   z-index: 1;
 }
 
-/* Dos columnas: imagen a la izquierda, info a la derecha */
-.detalle-layout {
-  display: grid;
-  grid-template-columns: 1.1fr 1fr; /* la imagen un poco más ancha que la info */
-  gap: 2.5rem;
-  align-items: start;               /* CAMBIO: cada columna mide lo que necesita (antes se estiraban) */
-}
-
-.detalle-imagen {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.imagen-detalle {
-  display: block;
-  width: 100%;
-  max-height: 75vh;                 /* CAMBIO: deja lugar para que entre todo sin scroll */
-  object-fit: contain;              /* muestra la obra entera, sin recortar */
-  border: 1px solid #000;           /* CAMBIO: marco negro recto, sin esquinas redondeadas */
-}
-
-/* CAMBIO: la columna de info ya no tiene alto fijo ni scroll propio: crece con su texto */
-.detalle-info {
-  display: flex;
-  flex-direction: column;
-  padding-top: 0.5rem;
-}
-
-.detalle-info h2 {
-  font-size: 2rem;                  /* CAMBIO: título grande en Inter Tight, como "Mis colecciones" */
-  line-height: 1.1;
-  padding-right: 2.5rem;            /* que el título no quede debajo de la ✕ */
-  margin-bottom: 0.4rem;
-}
-
-.detalle-info .subtitulo-tarjeta {
-  color: #000;                      /* CAMBIO: antes gris */
-  font-size: 0.85rem;
-  margin-bottom: 1.5rem;
-}
-
-.descripcion-detalle {
-  font-size: 0.85rem;
-  margin-bottom: 1.5rem;
-}
-
-.metadatos-detalle {
-  margin-bottom: 1.5rem;
-  border-top: 1px solid #000;       /* CAMBIO: líneas negras separan cada dato, estilo ficha */
-}
-
-.metadatos-detalle dt {
-  font-size: 0.7rem;
-  font-weight: 700;
-  text-transform: uppercase;        /* CAMBIO: etiqueta chica en mayúsculas */
-  letter-spacing: 0.05em;
-  padding-top: 0.6rem;
-}
-
-.metadatos-detalle dd {
-  color: #000;                      /* CAMBIO: antes gris */
-  font-size: 0.85rem;
-  padding-bottom: 0.6rem;
-  border-bottom: 1px solid #000;
-}
-
-/* CAMBIO: mismo estilo que los botones negros de los otros pop ups */
-#boton-agregar-a-coleccion {
-  align-self: flex-start;
-  width: 245px;
-  margin-top: 0;
-  padding: 0.7rem;
-  border-radius: 0;
-  background: #000;
-  color: #fff;
-  font-size: 0.8rem;
-  text-decoration: underline;
-}
-
-/* En pantallas angostas: una sola columna (imagen arriba, info abajo) */
-@media (max-width: 700px) {
-  .detalle-layout {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-  }
-
-  .imagen-detalle {
-    max-height: 45vh;
-  }
-}
-
-.sin-imagen {
-  aspect-ratio: 4 / 3;
-  display: grid;
-  place-items: center;
-  background: var(--color-border);
-  color: var(--color-text-soft);
-  font-size: 0.8rem;
-}
-
-/* =====  POP UP NUEVA COLECCIÓN ===== */
-.contenido-nueva-coleccion {
-  max-width: 900px;                        /* CAMBIO: bordes, padding y ✕ ahora vienen de .contenido-modal */
-}
-
-/* Título chico del pop up: es un h2 pero va con Space Mono, como el prototipo */
+/* Título chico de los pop ups: es un h2 pero va con Space Mono */
 .titulo-modal {
-  font-family: var(--fuente-texto);        /* CAMBIO: le gana a la regla general de h2 */
+  font-family: var(--fuente-texto);        /* le gana a la regla general de h2 */
   font-size: 0.95rem;
   font-weight: 400;
   margin-bottom: 2rem;
-}
-
-/* El formulario apila todo en una columna */
-#formulario-nueva-coleccion {
-  display: flex;
-  flex-direction: column;
-}
-
-#formulario-nueva-coleccion label {
-  font-family: var(--fuente-titulos);      /* CAMBIO: "Nombre" y "Descripción" con Inter Tight */
-  font-size: 1.6rem;
-  margin-bottom: 0.6rem;
-}
-
-#formulario-nueva-coleccion input,
-#formulario-nueva-coleccion textarea {
-  width: 360px;
-  max-width: 100%;                         /* en celular no se sale de la pantalla */
-  padding: 0.8rem 1.2rem;
-  border: 1px solid #000;
-  border-radius: 0;
-  font-family: var(--fuente-texto);        /* CAMBIO: usa la variable (el textarea no hereda la fuente solo) */
-  font-size: 0.8rem;
-  margin-bottom: 2rem;
-}
-
-#formulario-nueva-coleccion textarea {
-  height: 180px;
-  resize: none;                            /* que el usuario no pueda agrandarla arrastrando la esquina */
 }
 
 .error-formulario {
@@ -758,6 +680,7 @@ main {
   margin: -1rem 0 1rem;                    /* arriba negativo: queda pegado al campo */
 }
 
+/* Botón negro principal */
 .boton-crear-coleccion {
   align-self: flex-end;                    /* lo manda a la derecha */
   width: 245px;
@@ -765,89 +688,18 @@ main {
   padding: 0.7rem;
   border-radius: 0;
   background: #000;
-  /* CAMBIO: se sacó font-family, la hereda del body */
   font-size: 0.8rem;
   text-decoration: underline;
 }
 
-
-/* =====  POP UP AGREGAR A COLECCIÓN ===== */
-.contenido-agregar-coleccion {
-  max-width: 900px;                        /* CAMBIO: bordes, padding y ✕ ahora vienen de .contenido-modal */
+/* Botón desactivado (por ejemplo, todavía no se eligió carpeta) */
+.boton-crear-coleccion:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  text-decoration: none;
 }
 
-/* Grilla de carpetitas: entran las que quepan, mínimo 140px cada una */
-.grilla-elegir-coleccion {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 2.5rem 2rem;                        /* 2.5rem entre filas: deja lugar para las pestañas */
-  padding-top: 0.8rem;
-}
-
-/* Mensaje cuando no hay colecciones: ocupa todo el ancho de la grilla */
-.grilla-elegir-coleccion .mensaje-sin-colecciones {   /* CAMBIO: faltaba */
-  grid-column: 1 / -1;
-  padding: 1.5rem 0;
-}
-
-/* ----- Cada carpetita (es un botón) ----- */
-.carpeta-elegir {
-  position: relative;                      /* la pestaña se ubica respecto a la carpeta */
-  height: 90px;
-  margin: 0;                               /* anula el margin-top general de los botones */
-  padding: 0.5rem;
-  border: 1px solid #000;
-  border-radius: 4px;
-  background: #fff;
-  color: #000;
-  font-size: 0.75rem;
-  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.2s, color 0.2s;
-}
-
-/* La pestaña arriba a la derecha, igual en todas */
-.carpeta-elegir::before {
-  content: "";
-  position: absolute;
-  bottom: 100%;                            /* apoyada encima de la carpeta */
-  right: 10px;
-  width: 30%;
-  height: 10px;
-  margin-bottom: -1px;                     /* tapa la línea de arriba de la carpeta */
-  border: 1px solid #000;
-  border-bottom: none;                     /* CAMBIO: abierta abajo, se une a la carpeta */
-  border-radius: 4px 4px 0 0;              /* CAMBIO: puntas de arriba redondeadas */
-  background: inherit;                     /* CAMBIO: mismo fondo que la carpeta (blanco o negro) */
-}
-
-/* CAMBIO: faltaban el hover y la seleccionada */
-.carpeta-elegir:hover {
-  opacity: 1;                              /* anula el hover general de los botones */
-  transform: translateY(-4px);             /* se levanta un poquito */
-}
-
-.carpeta-elegir.seleccionada {
-  background: #000;                        /* la elegida: negra con letras blancas */
-  color: #fff;
-}
-
-/* El error de este pop up va debajo de la grilla, separado (sin el margen negativo del formulario) */
-#error-agregar-coleccion {
-  margin: 1.5rem 0 0;
-}
-
-/* ----- Botones de abajo ----- */
-.acciones-agregar-coleccion {              /* CAMBIO: faltaba */
-  display: flex;
-  justify-content: space-between;          /* uno a la izquierda, otro a la derecha */
-  align-items: center;
-  gap: 1rem;
-  margin-top: 2.5rem;                      /* separación con las carpetas */
-}
-
-.acciones-agregar-coleccion .boton-crear-coleccion {
-  align-self: auto;
-}
-
+/* Botón blanco secundario */
 .boton-secundario {
   margin: 0;
   padding: 0.7rem 1rem;
@@ -864,22 +716,217 @@ main {
   color: #fff;
 }
 
-/* Botón desactivado: todavía no se eligió carpeta */
-.boton-crear-coleccion:disabled {          /* CAMBIO: faltaba */
-  opacity: 0.35;
-  cursor: not-allowed;
-  text-decoration: none;
+
+/* =========================================================
+   7. POP UP DETALLE DE OBRA
+   ========================================================= */
+/* Dos columnas: imagen a la izquierda, info a la derecha */
+.detalle-layout {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;        /* la imagen un poco más ancha que la info */
+  gap: 2.5rem;
+  align-items: start;                      /* cada columna mide lo que necesita */
 }
 
-/* =====  POP UP VER COLECCIÓN (carpeta abierta) ===== */
+.detalle-imagen {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.imagen-detalle {
+  display: block;
+  width: 100%;
+  max-height: 75vh;
+  object-fit: contain;                     /* muestra la obra entera, sin recortar */
+  border: 1px solid #000;
+}
+
+.detalle-info {
+  display: flex;
+  flex-direction: column;
+  padding-top: 0.5rem;
+}
+
+.detalle-info h2 {
+  font-size: 2rem;
+  line-height: 1.1;
+  padding-right: 2.5rem;                   /* que el título no quede debajo de la ✕ */
+  margin-bottom: 0.4rem;
+}
+
+.detalle-info .subtitulo-tarjeta {
+  color: #000;
+  font-size: 0.85rem;
+  margin-bottom: 1.5rem;
+}
+
+.descripcion-detalle {
+  font-size: 0.85rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Ficha: líneas negras separan cada dato */
+.metadatos-detalle {
+  margin-bottom: 1.5rem;
+  border-top: 1px solid #000;
+}
+
+.metadatos-detalle dt {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding-top: 0.6rem;
+}
+
+.metadatos-detalle dd {
+  color: #000;
+  font-size: 0.85rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid #000;
+}
+
+#boton-agregar-a-coleccion {
+  align-self: flex-start;
+  width: 245px;
+  margin-top: 0;
+  padding: 0.7rem;
+  border-radius: 0;
+  background: #000;
+  color: #fff;
+  font-size: 0.8rem;
+  text-decoration: underline;
+}
+
+
+/* =========================================================
+   8. POP UP NUEVA / EDITAR COLECCIÓN
+   ========================================================= */
+.contenido-nueva-coleccion {
+  max-width: 900px;
+}
+
+/* El formulario apila todo en una columna */
+#formulario-nueva-coleccion {
+  display: flex;
+  flex-direction: column;
+}
+
+#formulario-nueva-coleccion label {
+  font-family: var(--fuente-titulos);
+  font-size: 1.6rem;
+  margin-bottom: 0.6rem;
+}
+
+#formulario-nueva-coleccion input,
+#formulario-nueva-coleccion textarea {
+  width: 360px;
+  max-width: 100%;                         /* en celular no se sale de la pantalla */
+  padding: 0.8rem 1.2rem;
+  border: 1px solid #000;
+  border-radius: 0;
+  font-family: var(--fuente-texto);        /* el textarea no hereda la fuente solo */
+  font-size: 0.8rem;
+  margin-bottom: 2rem;
+}
+
+#formulario-nueva-coleccion textarea {
+  height: 180px;
+  resize: none;                            /* no se puede agrandar arrastrando la esquina */
+}
+
+
+/* =========================================================
+   9. POP UP AGREGAR A COLECCIÓN
+   ========================================================= */
+.contenido-agregar-coleccion {
+  max-width: 900px;
+}
+
+/* Grilla de carpetitas: entran las que quepan, mínimo 140px cada una */
+.grilla-elegir-coleccion {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 2.5rem 2rem;                        /* 2.5rem entre filas: lugar para las pestañas */
+  padding-top: 0.8rem;
+}
+
+/* Mensaje cuando no hay colecciones: ocupa todo el ancho */
+.grilla-elegir-coleccion .mensaje-sin-colecciones {
+  grid-column: 1 / -1;
+  padding: 1.5rem 0;
+}
+
+/* ----- Cada carpetita (es un botón) ----- */
+.carpeta-elegir {
+  position: relative;                      /* la pestaña se ubica respecto a la carpeta */
+  height: 90px;
+  margin: 0;
+  padding: 0.5rem;
+  border: 1px solid #000;
+  border-radius: 4px;
+  background: #fff;
+  color: #000;
+  font-size: 0.75rem;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.2s, color 0.2s;
+}
+
+/* La pestaña arriba a la derecha, igual en todas */
+.carpeta-elegir::before {
+  content: "";
+  position: absolute;
+  bottom: 100%;
+  right: 10px;
+  width: 30%;
+  height: 10px;
+  margin-bottom: -1px;                     /* tapa la línea de arriba de la carpeta */
+  border: 1px solid #000;
+  border-bottom: none;
+  border-radius: 4px 4px 0 0;
+  background: inherit;                     /* mismo fondo que la carpeta (blanco o negro) */
+}
+
+.carpeta-elegir:hover {
+  opacity: 1;
+  transform: translateY(-4px);             /* se levanta un poquito */
+}
+
+.carpeta-elegir.seleccionada {
+  background: #000;                        /* la elegida: negra con letras blancas */
+  color: #fff;
+}
+
+/* El error va debajo de la grilla (sin el margen negativo del formulario) */
+#error-agregar-coleccion {
+  margin: 1.5rem 0 0;
+}
+
+/* ----- Botones de abajo ----- */
+.acciones-agregar-coleccion {
+  display: flex;
+  justify-content: space-between;          /* uno a la izquierda, otro a la derecha */
+  align-items: center;
+  gap: 1rem;
+  margin-top: 2.5rem;
+}
+
+.acciones-agregar-coleccion .boton-crear-coleccion {
+  align-self: auto;
+}
+
+
+/* =========================================================
+   10. POP UP VER COLECCIÓN (carpeta abierta)
+   ========================================================= */
 .carpeta-abierta {
   position: relative;                      /* la pestaña y la ✕ se ubican respecto a la carpeta */
   width: 100%;
   max-width: 1000px;
   margin-top: 2rem;                        /* lugar para la pestaña */
-  background: var(--color-carpeta, #fff);  /* el color de su carpeta (o blanco si no tiene) */
+  background: var(--color-carpeta, #fff);  /* el color de su carpeta (o blanco) */
   border: 1px solid #000;
-  border-radius: 0 10px 10px 10px;         /* arriba a la izquierda recta: ahí se une la pestaña */
+  border-radius: 0 10px 10px 10px;         /* arriba a la izquierda recta: ahí va la pestaña */
   transform-origin: bottom center;
   animation: abrir-carpeta 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
@@ -898,9 +945,9 @@ main {
 
 .pestana-abierta {
   position: absolute;
-  bottom: 100%;                            /* apoyada encima de la carpeta */
+  bottom: 100%;
   left: -1px;
-  margin-bottom: -1px;                     /* tapa la línea de arriba de la carpeta */
+  margin-bottom: -1px;
   padding: 0.4rem 1.4rem;
   background: var(--color-carpeta, #fff);
   border: 1px solid #000;
@@ -934,7 +981,19 @@ main {
   margin-bottom: 1.5rem;
 }
 
-/* Grilla tipo Pinterest: columnas de mínimo 200px, cada imagen con su alto real */
+/* ----- Editar y Borrar colección ----- */
+.acciones-ver-coleccion {
+  display: flex;
+  gap: 0.5rem;
+  margin: 0.75rem 0;
+}
+
+#boton-borrar-coleccion.confirmar {        /* segundo click: avisa que va a borrar */
+  background: #000;
+  color: #fff;
+}
+
+/* ----- Grilla tipo Pinterest: columnas de mínimo 200px ----- */
 .grilla-obras-coleccion {
   columns: 4 200px;
   column-gap: 1rem;
@@ -944,7 +1003,9 @@ main {
   column-span: all;                        /* el mensaje ocupa todas las columnas */
 }
 
+/* ----- Cada obra guardada ----- */
 .obra-coleccion {
+  position: relative;                      /* para ubicar la ✕ adentro de la tarjeta */
   break-inside: avoid;                     /* que una obra no se corte entre dos columnas */
   margin-bottom: 1rem;
   background: #fff;
@@ -962,7 +1023,7 @@ main {
 .obra-coleccion img {
   display: block;
   width: 100%;
-  height: auto;                            /* alto real de la imagen: eso da el efecto Pinterest */
+  height: auto;                            /* alto real de la imagen: efecto Pinterest */
 }
 
 .obra-coleccion p {
@@ -973,19 +1034,77 @@ main {
   text-overflow: ellipsis;
 }
 
-/* Cada obra aparece subiendo un poquito, como hojas que se despliegan */
-@keyframes aparecer-obra {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.abrir-obra {
+  cursor: pointer;                         /* imagen + título: abren el detalle */
 }
 
-/* =====  ONBOARDING (pantalla de bienvenida) ===== */
+.datos-obra {
+  font-size: 0.75rem;
+  opacity: 0.7;                            /* más clarito que el título */
+  margin: 0.25rem 0;
+}
+
+/* ✕ redonda para quitar la obra */
+.quitar-obra {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.4rem;
+  z-index: 1;
+  width: 28px;
+  height: 28px;
+  margin: 0;
+  padding: 0;
+  border: 1px solid #000;
+  border-radius: 50%;
+  background: #fff;
+  color: #000;
+  font-size: 0.8rem;
+  line-height: 1;
+}
+
+.quitar-obra:hover {
+  background: #000;
+  color: #fff;
+  opacity: 1;
+}
+
+/* Comentario: se guarda solo al salir del cuadro */
+.comentario-obra {
+  display: block;
+  width: 100%;
+  min-height: 3rem;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0.5rem 0.6rem;
+  border: none;
+  border-top: 1px solid #000;              /* una línea lo separa de los datos */
+  font: inherit;
+  font-size: 0.75rem;
+  resize: vertical;
+  cursor: text;
+}
+
+.obra-coleccion .estado-comentario {
+  font-size: 0.7rem;
+  padding: 0.2rem 0.6rem 0.4rem;
+}
+
+.obra-coleccion .estado-comentario:empty {
+  display: none;                           /* si no dice nada, no ocupa lugar */
+}
+
+
+/* =========================================================
+   11. POP UP CONFIRMAR (quitar obra)
+   ========================================================= */
+.contenido-confirmar {
+  max-width: 480px;
+}
+
+
+/* =========================================================
+   12. ONBOARDING (pantalla de bienvenida)
+   ========================================================= */
 .onboarding {
   position: fixed;
   inset: 0;                                /* ocupa toda la pantalla */
@@ -995,7 +1114,7 @@ main {
   justify-content: center;
   padding: 2rem;
   background: #fff;
-  overflow-y: auto;                        /* en celular, si no entra, se puede bajar */
+  overflow-y: auto;                        /* si no entra, se puede bajar */
 }
 
 .onboarding[hidden] {
@@ -1018,6 +1137,15 @@ main {
   max-width: 1000px;
 }
 
+/* ----- Cabecera: texto a la izquierda, abanico a la derecha ----- */
+.cabecera-onboarding {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  gap: 2rem;
+  margin-bottom: 3.5rem;
+}
+
 .etiqueta-onboarding {
   font-size: 0.75rem;
   text-transform: uppercase;
@@ -1033,98 +1161,13 @@ main {
   margin-bottom: 0;
 }
 
-/* Los tres pasos en fila, separados por líneas negras */
-.pasos-onboarding {
-  list-style: none;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  border-top: 1px solid #000;
-  margin-bottom: 3rem;
-}
-
-.pasos-onboarding li {
-  padding: 1.5rem 1.5rem 1.5rem 0;
-}
-
-.pasos-onboarding li + li {
-  border-left: 1px solid #000;            /* línea entre un paso y el siguiente */
-  padding-left: 1.5rem;
-}
-
-.numero-paso {
-  display: block;
-  font-size: 0.75rem;
-  margin-bottom: 0.8rem;
-}
-
-.pasos-onboarding h2 {
-  font-size: 1.6rem;
-  margin-bottom: 0.6rem;
-}
-
-.pasos-onboarding p {
-  font-size: 0.8rem;
-}
-
-.boton-entrar {
-  margin: 0;
-  padding: 0.9rem 2rem;
-  border: 1px solid #000;
-  border-radius: 0;
-  background: #000;
-  color: #fff;
-  font-size: 0.9rem;
-}
-
-.boton-entrar:hover {
-  opacity: 1;
-  background: #fff;
-  color: #000;
-}
-
-/* Entrada: cada parte aparece una después de la otra */
-.etiqueta-onboarding,
-.titulo-onboarding,
-.pasos-onboarding li,
-.boton-entrar {
-  animation: aparecer-obra 0.6s ease-out both;   /* reusa la animación de la carpeta abierta */
-}
-
-.titulo-onboarding                 { animation-delay: 0.1s; }
-.pasos-onboarding li:nth-child(1)  { animation-delay: 0.3s; }
-.pasos-onboarding li:nth-child(2)  { animation-delay: 0.45s; }
-.pasos-onboarding li:nth-child(3)  { animation-delay: 0.6s; }
-.boton-entrar                      { animation-delay: 0.8s; }
-
-/* En celular: los pasos uno debajo del otro */
-@media (max-width: 700px) {
-  .pasos-onboarding {
-    grid-template-columns: 1fr;
-  }
-
-  .pasos-onboarding li + li {
-    border-left: none;
-    border-top: 1px solid #000;
-    padding-left: 0;
-  }
-}
-
-/* Cabecera: texto a la izquierda, abanico a la derecha */
-.cabecera-onboarding {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: end;
-  gap: 2rem;
-  margin-bottom: 3.5rem;
-}
-
 /* ----- Abanico de carpetas ----- */
 .abanico {
   position: relative;                      /* las carpetas se ubican respecto a este cuadro */
   width: 340px;
   height: 230px;
   margin-right: 2rem;
-  animation: flotar 4s ease-in-out 1.6s infinite;   /* cuando termina de abrirse, flota suave para siempre */
+  animation: flotar 4s ease-in-out 1.6s infinite;   /* cuando termina de abrirse, flota */
 }
 
 @keyframes flotar {
@@ -1139,13 +1182,13 @@ main {
   width: 220px;
   height: 150px;
   margin-left: -110px;                     /* la mitad del ancho: queda centrada */
-  background: var(--color-carpeta);        /* el color lo pone la clase color-X */
+  margin-bottom: 1.5rem;
+  background: var(--color-carpeta);
   border: 1px solid #000;
   border-radius: 0 8px 8px 8px;            /* arriba a la izquierda recta: ahí va la pestaña */
   transform-origin: bottom center;         /* giran desde abajo, como las varillas de un abanico */
   animation: abrir-abanico 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) both;
   transition: translate 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-    margin-bottom: 1.5rem;
 }
 
 /* Cuánto gira cada una y cuándo arranca */
@@ -1172,9 +1215,9 @@ main {
 
 .pestana-abanico {
   position: absolute;
-  bottom: 100%;                            /* apoyada encima de la carpeta */
+  bottom: 100%;
   left: -1px;
-  margin-bottom: -1px;                     /* tapa la línea de arriba de la carpeta */
+  margin-bottom: -1px;
   padding: 0.25rem 0.9rem;
   background: var(--color-carpeta);
   border: 1px solid #000;
@@ -1182,39 +1225,91 @@ main {
   border-radius: 8px 8px 0 0;
   font-size: 0.7rem;
   white-space: nowrap;
-  
 }
 
-/* En celular: el abanico arriba del título, más chico */
-@media (max-width: 700px) {
-  .cabecera-onboarding {
-    grid-template-columns: 1fr;
-  }
-
-  .abanico {
-    order: -1;                             /* lo pasa arriba del texto */
-    justify-self: center;
-    margin-right: 0;
-    scale: 0.65;
-  }
+/* ----- Los tres pasos en fila, separados por líneas negras ----- */
+.pasos-onboarding {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-top: 1px solid #000;
+  margin-bottom: 3rem;
 }
 
-/* =====  ACCESO: login y registro ===== */
+.pasos-onboarding li {
+  padding: 1.5rem 1.5rem 1.5rem 0;
+}
+
+.pasos-onboarding li + li {
+  border-left: 1px solid #000;             /* línea entre un paso y el siguiente */
+  padding-left: 1.5rem;
+}
+
+.numero-paso {
+  display: block;
+  font-size: 0.75rem;
+  margin-bottom: 0.8rem;
+}
+
+.pasos-onboarding h2 {
+  font-size: 1.6rem;
+  margin-bottom: 0.6rem;
+}
+
+.pasos-onboarding p {
+  font-size: 0.8rem;
+}
+
+/* ----- Botón "Entrar al museo" (también se usa en login y registro) ----- */
+.boton-entrar {
+  margin: 0;
+  padding: 0.9rem 2rem;
+  border: 1px solid #000;
+  border-radius: 0;
+  background: #000;
+  color: #fff;
+  font-size: 0.9rem;
+}
+
+.boton-entrar:hover {
+  opacity: 1;
+  background: #fff;
+  color: #000;
+}
+
+/* ----- Entrada: cada parte aparece una después de la otra ----- */
+.etiqueta-onboarding,
+.titulo-onboarding,
+.pasos-onboarding li,
+.boton-entrar {
+  animation: aparecer-obra 0.6s ease-out both;
+}
+
+.titulo-onboarding                 { animation-delay: 0.1s; }
+.pasos-onboarding li:nth-child(1)  { animation-delay: 0.3s; }
+.pasos-onboarding li:nth-child(2)  { animation-delay: 0.45s; }
+.pasos-onboarding li:nth-child(3)  { animation-delay: 0.6s; }
+.boton-entrar                      { animation-delay: 0.8s; }
+
+
+/* =========================================================
+   13. ACCESO: LOGIN Y REGISTRO
+   ========================================================= */
 .acceso {
   position: fixed;
   inset: 0;                                /* ocupa toda la pantalla */
-  z-index: 150;                            /* arriba de la página y los pop ups (100), debajo del onboarding (200) */
+  z-index: 150;                            /* encima de la página y los pop ups (100), debajo del onboarding (200) */
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 2rem;
   background: #fff;
-  overflow-y: auto;                        /* en celular, si no entra, se puede bajar */
+  overflow-y: auto;                        /* si no entra, se puede bajar */
 }
 
 .acceso[hidden],
 .formulario-acceso[hidden] {
-  display: none;                           /* que el hidden funcione aunque tenga display flex */
+  display: none;                           /* que hidden funcione aunque tenga display flex */
 }
 
 .contenido-acceso {
@@ -1245,7 +1340,7 @@ main {
   width: 100%;
   padding: 0.8rem 1rem;
   border: 1px solid #000;
-  border-radius: 0;                        /* esquinas rectas, como el resto */
+  border-radius: 0;
   font-family: var(--fuente-texto);
   font-size: 0.85rem;
   margin-bottom: 1.5rem;
@@ -1277,120 +1372,398 @@ main {
   opacity: 0.6;
 }
 
-/* ===== MENÚ DE INICIO (Cerrar sesión) ===== */
-.contenedor-inicio {
-  position: relative;                      /* el menú se ubica respecto a este botón */
-}
-
-.menu-inicio {
-  position: absolute;
-  top: 100%;                               /* justo debajo de "Inicio" */
-  left: 0;
-  width: 100%;                             /* mismo ancho que el botón */
-}
-
-.menu-inicio[hidden] {
-  display: none;
-}
-
-.menu-inicio .boton-categoria {
-  margin-top: -1px;                        /* pisa el borde de "Inicio": no queda borde doble */
-}
-
-/* ---------- ACCIONES DENTRO DE UNA COLECCIÓN ---------- */
-.acciones-ver-coleccion {
-  display: flex;                /* los dos botones uno al lado del otro */
-  gap: 0.5rem;
-  margin: 0.75rem 0;
-}
-#boton-borrar-coleccion.confirmar {     /* segundo paso: avisa que va a borrar */
-  background: #000;
-  color: #fff;
-}
-.abrir-obra {
-  cursor: pointer;              /* manito: se puede abrir el detalle */
-}
-.datos-obra {
-  font-size: 0.75rem;
-  opacity: 0.7;                 /* más clarito que el título */
-  margin: 0.25rem 0;
-}
-.obra-coleccion {
-  position: relative;            /* para ubicar la ✕ adentro de la tarjeta */
-}
-.quitar-obra {
-  position: absolute;
-  top: 0.4rem;
-  right: 0.4rem;
-  z-index: 1;
-  width: 28px;
-  height: 28px;
-  margin: 0;                     /* anula el margin-top general de los botones */
-  padding: 0;
-  border: 1px solid #000;
-  border-radius: 50%;            /* redonda */
-  background: #fff;
-  color: #000;
-  font-size: 0.8rem;
-  line-height: 1;
-}
-.quitar-obra:hover {
-  background: #000;
-  color: #fff;
-  opacity: 1;
-}
-.comentario-obra {
-  display: block;
-  width: 100%;
-  min-height: 3rem;
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0.5rem 0.6rem;
-  border: none;
-  border-top: 1px solid #000;    /* una línea que lo separa de los datos */
-  font: inherit;
-  font-size: 0.75rem;
-  resize: vertical;
-  cursor: text;
-}
-.obra-coleccion .estado-comentario {
-  font-size: 0.7rem;
-  padding: 0.2rem 0.6rem 0.4rem;
-}
-.obra-coleccion .estado-comentario:empty {
-  display: none;                 /* si no dice nada, no ocupa lugar */
-}
-.contenido-confirmar {
-  max-width: 480px;              /* pop up chico */
-}
-/* ---------- OJITO DE CONTRASEÑA ---------- */
+/* ----- Ojito para mostrar / ocultar la contraseña ----- */
 .campo-password {
-  position: relative;               /* para poder ubicar el botón adentro del campo */
-  margin-bottom: 1.5rem;            /* el espacio de abajo lo da el div, no el input */
+  position: relative;                      /* el botón se ubica adentro del campo */
+  margin-bottom: 1.5rem;                   /* el espacio de abajo lo da el div, no el input */
 }
+
 .campo-password input {
-  margin-bottom: 0;                 /* si no, el ojo queda corrido para arriba */
-  padding-right: 2.8rem;            /* lugar a la derecha para que el texto no quede abajo del ojo */
+  margin-bottom: 0;                        /* si no, el ojo queda corrido para arriba */
+  padding-right: 2.8rem;                   /* lugar para que el texto no quede abajo del ojo */
   box-sizing: border-box;
 }
+
 .ver-password {
   position: absolute;
   right: 0.8rem;
   top: 50%;
-  transform: translateY(-50%);      /* lo centra verticalmente dentro del input */
-  margin: 0;                        /* anula el margin-top general de los botones */
+  transform: translateY(-50%);             /* centrado en vertical dentro del input */
+  margin: 0;
   padding: 0;
   border: none;
   background: none;
   color: #000;
   display: flex;
 }
+
 .ver-password:hover {
   opacity: 0.6;
 }
+
 .ver-password svg {
   width: 20px;
   height: 20px;
 }
+
 .ver-password .tachado { display: none; }           /* contraseña oculta: ojo normal */
 .ver-password.visible .tachado { display: inline; } /* contraseña visible: ojo tachado */
+
+
+/* =========================================================
+   14. GESTOS CON EL DEDO
+   En estas zonas solo se desliza para arriba/abajo (y zoom con dos dedos).
+   La galería no está en la lista: ahí se sigue deslizando para el costado.
+   ========================================================= */
+.encabezado,
+.seccion-colecciones,
+.onboarding,
+.acceso {
+  touch-action: pan-y pinch-zoom;
+}
+
+
+/* =========================================================
+   15. RESPONSIVE
+   ========================================================= */
+
+/* ---------------------------------------------------------
+   TABLET (820px o menos): header en una columna,
+   nav arriba y buscador abajo
+   --------------------------------------------------------- */
+@media (max-width: 820px) {
+  :root {
+    --alto-header: 120px;
+  }
+
+  .encabezado {
+    grid-template-columns: 1fr;            /* una sola columna: todo apilado y centrado */
+    justify-items: center;
+    align-content: center;
+    gap: 0.75rem;
+  }
+
+  .nav-principal,
+  .encabezado .barra-busqueda {
+    grid-column: 1;
+    justify-self: center;
+  }
+
+  .encabezado .barra-busqueda {
+    margin-right: 0;                       /* centrada: sin el margen de la derecha */
+  }
+
+  .boton-nav {
+    min-width: 0;
+    font-size: 0.7rem;
+    padding: 0.4rem 0.6rem;
+  }
+}
+
+/* ---------------------------------------------------------
+   CELULAR GRANDE (700px o menos): todo en una columna
+   --------------------------------------------------------- */
+@media (max-width: 700px) {
+  /* Detalle: imagen arriba, info abajo */
+  .detalle-layout {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .imagen-detalle {
+    max-height: 45vh;
+  }
+
+  /* Onboarding: abanico arriba del título y pasos uno debajo del otro */
+  .cabecera-onboarding {
+    grid-template-columns: 1fr;
+  }
+
+  .abanico {
+    order: -1;                             /* lo pasa arriba del texto */
+    justify-self: center;
+    margin-right: 0;
+    scale: 0.65;
+  }
+
+  .pasos-onboarding {
+    grid-template-columns: 1fr;
+  }
+
+  .pasos-onboarding li + li {
+    border-left: none;
+    border-top: 1px solid #000;
+    padding-left: 0;
+  }
+}
+
+/* ---------------------------------------------------------
+   CELULAR (600px o menos)
+   --------------------------------------------------------- */
+@media (max-width: 600px) {
+
+  /* ----- Header: fila 1 = logo | lupa · fila 2 = nav en una línea ----- */
+  :root {
+    --alto-header: 125px;                  /* la galería resta este alto */
+  }
+
+  .encabezado {
+    grid-template-columns: auto minmax(0, 1fr); /* logo (lo que mida) | buscador (el resto, sin pasarse) */
+    grid-template-rows: auto auto;
+    justify-items: stretch;
+    align-content: center;
+    gap: 0.5rem 1rem;
+    padding: 0 1rem;
+  }
+
+  .logo {
+    grid-column: 1;
+    grid-row: 1;
+    margin: 0;
+  }
+
+  /* Nav: los 4 botones en una sola fila, todo el ancho */
+  .nav-principal {
+    grid-column: 1 / -1;                   /* de la primera a la última columna */
+    grid-row: 2;
+    justify-self: stretch;
+    display: flex;
+  }
+
+  .contenedor-inicio,
+  .contenedor-filtros {
+    flex: 1 1 auto;
+    margin: 0;
+    display: flex;                         /* "Inicio" y "Filtros" miden lo mismo que los otros */
+  }
+
+  .boton-nav {
+    flex: 1 1 auto;                        /* se reparten el ancho */
+    width: 100%;
+    min-width: 0;
+    padding: 0.45rem 0.3rem;
+    font-size: 12px;
+    white-space: normal;                   /* si el texto no entra, baja a una segunda línea */
+    line-height: 1.15;
+    display: flex;                         /* texto centrado en las dos direcciones */
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
+  /* Menú de filtros: ancho de la pantalla, debajo del header */
+  .menu-filtros {
+    position: fixed;
+    top: var(--alto-header);
+    left: 1rem;
+    right: 1rem;
+  }
+
+  .lista-categorias,
+  .lista-opciones {
+    width: 50%;
+  }
+
+  /* Buscador cerrado: solo la lupa, a la derecha */
+  .encabezado .barra-busqueda {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: end;
+    margin-right: 0.5rem;                  /* mismo margen que las carpetas del logo */
+    width: auto;
+    border-bottom: none;
+  }
+
+  .encabezado .barra-busqueda input {
+    display: none;                         /* el campo no se ve hasta tocar la lupa */
+    font-size: 16px;                       /* 16px: el iPhone no hace zoom al escribir */
+  }
+
+  .icono-busqueda {
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+  }
+
+  /* Buscador abierto (la clase "abierta" la pone el JS) */
+  .encabezado .barra-busqueda.abierta {
+    justify-self: stretch;                 /* ocupa todo el lugar al lado del logo */
+    border-bottom: 1px solid #000;
+  }
+
+  .encabezado .barra-busqueda.abierta input {
+    display: block;
+  }
+
+  /* ----- Galería ----- */
+  .galeria-obras {
+    --alto-galeria: 70vh;
+  }
+
+  /* ----- Mis colecciones ----- */
+  .seccion-colecciones {
+    margin: 2.5rem auto 2rem;
+    padding: 0 1rem;
+  }
+
+  .seccion-colecciones h2 {
+    font-size: 1.6rem;
+    margin-bottom: 1rem;
+  }
+
+  .pila-colecciones {
+    padding: 2.5rem 1.5rem 0;              /* menos aire entre las paredes y las carpetas */
+  }
+
+  /* ----- Pop ups ----- */
+  .modal {
+    padding: 0.75rem;
+  }
+
+  .contenido-modal {
+    padding: 1.25rem 1.25rem 1.5rem;
+    max-height: 88vh;
+  }
+
+  .cerrar-modal {
+    top: 1rem;
+    right: 1rem;
+  }
+
+  .titulo-modal {
+    margin-bottom: 1.25rem;
+    padding-right: 2rem;                   /* que el título no quede debajo de la ✕ */
+  }
+
+  /* Nueva / editar colección */
+  #formulario-nueva-coleccion label {
+    font-size: 1.1rem;
+  }
+
+  #formulario-nueva-coleccion input,
+  #formulario-nueva-coleccion textarea {
+    font-size: 16px;                       /* el iPhone no hace zoom */
+  }
+
+  #formulario-nueva-coleccion textarea {
+    min-height: 6rem;
+    height: 6rem;
+  }
+
+  /* Agregar a colección: carpetitas de a dos y botones uno arriba del otro */
+  .grilla-elegir-coleccion {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem 0.75rem;
+  }
+
+  .acciones-agregar-coleccion {
+    flex-direction: column-reverse;        /* "Agregar a…" arriba, "+ Crear nueva" abajo */
+    align-items: stretch;
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+  }
+
+  .acciones-agregar-coleccion button {
+    width: 100%;
+    margin: 0;
+  }
+
+  /* Carpeta abierta */
+  .interior-carpeta {
+    padding: 1.25rem 1rem 1.5rem;
+    max-height: 78vh;
+  }
+
+  .titulo-ver-coleccion {
+    font-size: 1.5rem;
+  }
+
+  .acciones-ver-coleccion .boton-categoria {
+    font-size: 0.75rem;
+    padding: 0.5rem;
+  }
+
+  .grilla-obras-coleccion {
+    columns: 2;                            /* dos obras por fila */
+    column-gap: 0.75rem;
+  }
+
+  .datos-obra,
+  .comentario-obra,
+  .obra-coleccion .estado-comentario,
+  .carpeta-otra small {
+    font-size: 12px;                       /* letra mínima en celular */
+  }
+
+  /* ----- Onboarding y acceso: se pueden bajar sin cortarse ----- */
+  .onboarding,
+  .acceso {
+    align-items: flex-start;
+    padding: 1.5rem 1.25rem;
+    overflow-y: auto;
+    overflow-x: hidden;                    /* nada se desliza para el costado */
+  }
+
+  .contenido-onboarding,
+  .contenido-acceso {
+    margin: auto 0;                        /* centrado si entra; si no entra, arranca arriba */
+  }
+
+  /* Onboarding */
+  .cabecera-onboarding {
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .etiqueta-onboarding {
+    font-size: 12px;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.75rem;
+  }
+
+  .titulo-onboarding {
+    font-size: 2.4rem;
+  }
+
+  .abanico {
+    width: 220px;                          /* antes 340px: se salía de la pantalla */
+    height: 170px;
+    scale: 0.7;
+  }
+
+  .pasos-onboarding {
+    margin-bottom: 1.5rem;
+  }
+
+  .pasos-onboarding li {
+    padding: 1rem 0;
+  }
+
+  .pasos-onboarding h2 {
+    font-size: 1.3rem;
+  }
+
+  .pasos-onboarding p {
+    font-size: 0.75rem;
+  }
+
+  /* Login y registro */
+  .titulo-acceso {
+    font-size: 2rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .formulario-acceso label {
+    font-size: 1rem;
+    margin-bottom: 0.35rem;
+  }
+
+  .formulario-acceso input {
+    font-size: 16px;                       /* el iPhone no hace zoom al tocar el campo */
+    margin-bottom: 1rem;
+  }
+
+  .campo-password {
+    margin-bottom: 1rem;
+  }
+}

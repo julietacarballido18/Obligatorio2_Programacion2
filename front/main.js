@@ -668,6 +668,20 @@ formularioBusqueda.addEventListener("submit", (evento) => {
   buscar(texto);
 });
 
+// LUPA: en celular la barra arranca cerrada y se despliega al tocar la lupa
+const lupa = formularioBusqueda.querySelector(".icono-busqueda");
+
+lupa.addEventListener("click", () => {
+  if (!formularioBusqueda.classList.contains("abierta")) {   // estaba cerrada → la abre
+    formularioBusqueda.classList.add("abierta");
+    campoBusqueda.focus();                                    // lista para escribir
+  } else if (campoBusqueda.value.trim() !== "") {            // abierta y con texto → busca
+    formularioBusqueda.requestSubmit();
+  } else {                                                    // abierta y vacía → la cierra
+    formularioBusqueda.classList.remove("abierta");
+  }
+});
+
 // ---------- SCROLL HORIZONTAL CON LA RUEDA DEL MOUSE ----------
 /* La rueda del mouse scrollea hacia abajo por defecto. Acá la "traducimos" a scroll hacia los costados. */
 const galeria = document.getElementById("galeria-obras");
