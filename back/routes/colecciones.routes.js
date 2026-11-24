@@ -1,5 +1,5 @@
 import express from "express"
-import { listar, crear, editar, borrar } from "../controllers/colecciones.controller.js"
+import { listar, crear, editar, borrar, agregar, comentar, quitar } from "../controllers/colecciones.controller.js"
 
 const router = express.Router()
 
@@ -9,3 +9,8 @@ router.put("/:id", editar)       // PUT    /colecciones/:id
 router.delete("/:id", borrar)    // DELETE /colecciones/:id
 
 export default router
+
+router.post("/:id/obras", agregar)
+router.put("/:id/obras/:idObra", comentar)
+router.delete("/:id/obras/:idObra", quitar)
+

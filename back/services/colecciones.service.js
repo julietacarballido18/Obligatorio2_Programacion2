@@ -8,6 +8,7 @@ import {
     guardarCambios
 } from "../repositories/colecciones.repository.js"
 
+
 // HELPERS (no exportar)
 
 // CREAR UN ERROR CON CODIGO (400, 403, 404, 409)
@@ -81,4 +82,48 @@ export async function editarColeccion(id, datos, usuarioId) {
 export async function borrarColeccion(id, usuarioId) {
     await buscarTuya(id, usuarioId)
     return await eliminar(id)
+}
+
+// ---------- OBRAS DENTRO DE UNA COLECCIÓN ----------
+
+// AGREGAR UNA OBRA A UNA COLECCIÓN
+export async function agregarObra(usuarioId, id, datos) {
+    const coleccion = await buscarTuya(id, usuarioId)
+
+    if (!datos.id || typeof datos.id !== "number") {
+        throw errorCon(400, "La obra necesita un id numérico")
+    }
+    const yaEsta = coleccion.obras.some((obra) => obra.id === datos.id)
+    if (yaEsta) {
+        throw errorCon(409, "Esa obra ya está en la colección")
+    }
+
+    coleccion.obras.push(datos)
+    return await guardarCambios(coleccion)
+}
+
+// EDITAR EL COMENTARIO DE UNA OBRA
+export async function editarComentario(usuarioId, id, idObra, datos) {
+    const coleccion = await buscarTuya(id, usuarioId)
+
+    const obra = coleccion.obras.find((obra) => obra.id === Number(idObra))
+    if (!obra) {
+        throw errorCon(404, "Esa obra no está en la colección")
+    }
+
+    obra.comentario = (datos.comentario ?? "").trim()
+    return await guardarCambios(coleccion)
+}
+
+// QUITAR UNA OBRA DE UNA COLECCIÓN
+export async function quitarObra(usuarioId, id, idObra) {
+    const coleccion = await buscarTuya(id, usuarioId)
+
+    const yaEsta = coleccion.obras.some((obra) => obra.id === Number(idObra))
+    if (!yaEsta) {
+        throw errorCon(404, "Esa obra no está en la colección")
+    }
+
+    coleccion.obras = coleccion.obras.filter((obra) => obra.id !== Number(idObra))
+    return await guardarCambios(coleccion)
 }
