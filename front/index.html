@@ -19,43 +19,43 @@
 <body>
 
   <!-- ===== ONBOARDING: pantalla de bienvenida ===== -->
-<div id="onboarding" class="onboarding">
+  <div id="onboarding" class="onboarding">
     <div class="contenido-onboarding">
-    <div class="cabecera-onboarding">
-      <div>
-        <p class="etiqueta-onboarding">Art Institute of Chicago · Colección pública</p>
-        <h1 class="titulo-onboarding">Bienvenido a tu<br />museo personal</h1>
+      <div class="cabecera-onboarding">
+        <div>
+          <p class="etiqueta-onboarding">Art Institute of Chicago · Colección pública</p>
+          <h1 class="titulo-onboarding">Bienvenido a tu<br />museo personal</h1>
+        </div>
+
+        <!-- Abanico decorativo: tres carpetas con los colores de las colecciones -->
+        <div class="abanico" aria-hidden="true">
+          <div class="carpeta-abanico izquierda color-4"><span class="pestana-abanico">♥ Van Gogh</span></div>
+          <div class="carpeta-abanico derecha color-5"><span class="pestana-abanico">♥ Para ver</span></div>
+          <div class="carpeta-abanico centro color-0"><span class="pestana-abanico">♥ Favoritas</span></div>
+        </div>
       </div>
 
-      <!-- Abanico decorativo: tres carpetas con los colores de las colecciones -->
-      <div class="abanico" aria-hidden="true">
-        <div class="carpeta-abanico izquierda color-4"><span class="pestana-abanico">♥ Van Gogh</span></div>
-        <div class="carpeta-abanico derecha color-5"><span class="pestana-abanico">♥ Para ver</span></div>
-        <div class="carpeta-abanico centro color-0"><span class="pestana-abanico">♥ Favoritas</span></div>
-      </div>
+      <ol class="pasos-onboarding">
+        <li>
+          <span class="numero-paso">01</span>
+          <h2>Explorá</h2>
+          <p>Recorré la galería deslizando hacia el costado. Tocá una obra para ver su ficha completa.</p>
+        </li>
+        <li>
+          <span class="numero-paso">02</span>
+          <h2>Buscá y filtrá</h2>
+          <p>Escribí en el buscador o usá Filtros para ver obras por tipo, área artística o movimiento.</p>
+        </li>
+        <li>
+          <span class="numero-paso">03</span>
+          <h2>Coleccioná</h2>
+          <p>Guardá tus obras favoritas en carpetas propias y armá tu museo a tu medida.</p>
+        </li>
+      </ol>
+
+      <button type="button" id="boton-entrar" class="boton-entrar">Entrar al museo →</button>
     </div>
-
-    <ol class="pasos-onboarding">
-      <li>
-        <span class="numero-paso">01</span>
-        <h2>Explorá</h2>
-        <p>Recorré la galería deslizando hacia el costado. Tocá una obra para ver su ficha completa.</p>
-      </li>
-      <li>
-        <span class="numero-paso">02</span>
-        <h2>Buscá y filtrá</h2>
-        <p>Escribí en el buscador o usá Filtros para ver obras por tipo, área artística o movimiento.</p>
-      </li>
-      <li>
-        <span class="numero-paso">03</span>
-        <h2>Coleccioná</h2>
-        <p>Guardá tus obras favoritas en carpetas propias y armá tu museo a tu medida.</p>
-      </li>
-    </ol>
-
-    <button type="button" id="boton-entrar" class="boton-entrar">Entrar al museo →</button>
   </div>
-</div>
 
   <!-- ===== ACCESO: login y registro (arranca oculto) ===== -->
   <div id="acceso" class="acceso" hidden>
@@ -72,10 +72,11 @@
         <div class="campo-password">
           <input type="password" id="login-password" autocomplete="current-password" />
           <button type="button" class="ver-password" aria-label="Mostrar contraseña">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/>
-              <circle cx="12" cy="12" r="3"/>
-              <line class="tachado" x1="3" y1="3" x2="21" y2="21"/>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
+              <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z" />
+              <circle cx="12" cy="12" r="3" />
+              <line class="tachado" x1="3" y1="3" x2="21" y2="21" />
             </svg>
           </button>
         </div>
@@ -101,10 +102,11 @@
         <div class="campo-password">
           <input type="password" id="registro-password" autocomplete="new-password" />
           <button type="button" class="ver-password" aria-label="Mostrar contraseña">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/>
-              <circle cx="12" cy="12" r="3"/>
-              <line class="tachado" x1="3" y1="3" x2="21" y2="21"/>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
+              <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z" />
+              <circle cx="12" cy="12" r="3" />
+              <line class="tachado" x1="3" y1="3" x2="21" y2="21" />
             </svg>
           </button>
         </div>
@@ -122,22 +124,23 @@
 
   <header class="encabezado">
     <!-- Logo: mini abanico de carpetas. Al tocarlo vuelve a abrir el onboarding -->
-<button type="button" class="logo" id="boton-logo" aria-label="Ver bienvenida">
-  <span class="carpeta-logo izquierda color-4"></span>
-  <span class="carpeta-logo derecha color-5"></span>
-  <span class="carpeta-logo centro color-0"></span>
-</button>
+    <button type="button" class="logo" id="boton-logo" aria-label="Ver bienvenida">
+      <span class="carpeta-logo izquierda color-4"></span>
+      <span class="carpeta-logo derecha color-5"></span>
+      <span class="carpeta-logo centro color-0"></span>
+    </button>
 
     <!-- ===== NAV PRINCIPAL ===== -->
     <nav class="nav-principal">
-        <div class="contenedor-inicio">
-          <button class="boton-nav activo" data-vista="explorar" id="boton-inicio">Inicio</button>
-          <!-- Menú desplegable de Inicio: arranca oculto -->
+      <div class="contenedor-inicio">
+        <button class="boton-nav activo" data-vista="explorar" id="boton-inicio">Inicio</button>
+        <!-- Menú desplegable de Inicio: arranca oculto -->
         <div class="menu-inicio" id="menu-inicio" hidden>
           <button type="button" class="boton-categoria" id="boton-cerrar-sesion">Cerrar sesión</button>
         </div>
       </div>
       <button class="boton-nav" data-vista="colecciones">Mis colecciones</button>
+      <button class="boton-nav" id="boton-ver-colecciones">Ver colecciones</button>
       <div class="contenedor-filtros">
         <button class="boton-nav" id="boton-alternar-filtros">Filtros</button>
 
@@ -196,31 +199,41 @@
         <div class="frente-cajon">
           <button id="boton-agregar-coleccion" class="boton-agregar-coleccion" aria-label="Crear colección">+</button>
         </div>
-        
+
       </section>
 
     </section>
 
   </main>
 
-  <!-- ===== POP UP VER COLECCIÓN (carpeta abierta) ===== -->
-<div id="modal-ver-coleccion" class="modal" hidden>
-  <div class="carpeta-abierta" id="carpeta-abierta">
-    <p class="pestana-abierta" id="pestana-abierta"></p>
-    <button type="button" class="cerrar-modal" id="boton-cerrar-ver-coleccion">✕</button>
-
-    <div class="interior-carpeta">
-      <h2 id="titulo-ver-coleccion" class="titulo-ver-coleccion"></h2>
-      <p id="descripcion-ver-coleccion" class="descripcion-ver-coleccion"></p>
-            <div class="acciones-ver-coleccion">
-        <button type="button" id="boton-editar-coleccion" class="boton-categoria">Editar</button>
-        <button type="button" id="boton-borrar-coleccion" class="boton-categoria">Borrar colección</button>
-      </div>
-      <p id="error-ver-coleccion" class="error-formulario" hidden></p>
-      <div id="grilla-obras-coleccion" class="grilla-obras-coleccion"></div>
+    <!-- ===== POP UP COLECCIONES DE OTROS USUARIOS ===== -->
+  <div id="modal-otras-colecciones" class="modal" hidden>
+    <div class="contenido-modal contenido-agregar-coleccion">
+      <button type="button" class="cerrar-modal" id="boton-cerrar-otras-colecciones">✕</button>
+      <h2 class="titulo-modal">Colecciones de otros usuarios</h2>
+      <div id="grilla-otras-colecciones" class="grilla-elegir-coleccion"></div>
+      <p id="error-otras-colecciones" class="error-formulario" hidden></p>
     </div>
   </div>
-</div>
+
+  <!-- ===== POP UP VER COLECCIÓN (carpeta abierta) ===== -->
+  <div id="modal-ver-coleccion" class="modal" hidden>
+    <div class="carpeta-abierta" id="carpeta-abierta">
+      <p class="pestana-abierta" id="pestana-abierta"></p>
+      <button type="button" class="cerrar-modal" id="boton-cerrar-ver-coleccion">✕</button>
+
+      <div class="interior-carpeta">
+        <h2 id="titulo-ver-coleccion" class="titulo-ver-coleccion"></h2>
+        <p id="descripcion-ver-coleccion" class="descripcion-ver-coleccion"></p>
+        <div class="acciones-ver-coleccion">
+          <button type="button" id="boton-editar-coleccion" class="boton-categoria">Editar</button>
+          <button type="button" id="boton-borrar-coleccion" class="boton-categoria">Borrar colección</button>
+        </div>
+        <p id="error-ver-coleccion" class="error-formulario" hidden></p>
+        <div id="grilla-obras-coleccion" class="grilla-obras-coleccion"></div>
+      </div>
+    </div>
+  </div>
 
   <!-- ===== DETALLE DE OBRA ===== -->
   <div id="modal-detalle" class="modal" hidden>
@@ -230,23 +243,24 @@
   </div>
 
   <!-- ===== POP UP AGREGAR A COLECCIÓN ===== -->
-<div id="modal-agregar-coleccion" class="modal" hidden>
-  <div class="contenido-modal contenido-agregar-coleccion">
-    <button type="button" class="cerrar-modal" id="boton-cerrar-agregar-coleccion">✕</button>
+  <div id="modal-agregar-coleccion" class="modal" hidden>
+    <div class="contenido-modal contenido-agregar-coleccion">
+      <button type="button" class="cerrar-modal" id="boton-cerrar-agregar-coleccion">✕</button>
 
-    <h2 class="titulo-modal">Agregar a colección</h2>
+      <h2 class="titulo-modal">Agregar a colección</h2>
 
-    <!-- Una carpetita por colección: las dibuja el JS -->
-    <div id="grilla-elegir-coleccion" class="grilla-elegir-coleccion"></div>
+      <!-- Una carpetita por colección: las dibuja el JS -->
+      <div id="grilla-elegir-coleccion" class="grilla-elegir-coleccion"></div>
 
-    <p id="error-agregar-coleccion" class="error-formulario" hidden></p>
+      <p id="error-agregar-coleccion" class="error-formulario" hidden></p>
 
-    <div class="acciones-agregar-coleccion">
-      <button type="button" id="boton-nueva-desde-agregar" class="boton-secundario">+ Crear nueva colección</button>
-      <button type="button" id="boton-confirmar-agregar" class="boton-crear-coleccion" disabled>Elegí una colección</button>
+      <div class="acciones-agregar-coleccion">
+        <button type="button" id="boton-nueva-desde-agregar" class="boton-secundario">+ Crear nueva colección</button>
+        <button type="button" id="boton-confirmar-agregar" class="boton-crear-coleccion" disabled>Elegí una
+          colección</button>
+      </div>
     </div>
   </div>
-</div>
 
   <!-- ===== POP UP NUEVA COLECCIÓN ===== -->
   <div id="modal-nueva-coleccion" class="modal" hidden>
@@ -269,7 +283,7 @@
     </div>
   </div>
 
-    <!-- ===== POP UP CONFIRMAR QUITAR OBRA ===== -->
+  <!-- ===== POP UP CONFIRMAR QUITAR OBRA ===== -->
   <div id="modal-confirmar" class="modal" hidden>
     <div class="contenido-modal contenido-confirmar">
       <h2 class="titulo-modal">Quitar obra</h2>

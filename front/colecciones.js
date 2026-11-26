@@ -40,3 +40,15 @@ export const borrarColeccion = async (id) => {
 export const agregarObraAColeccion = async (id, obra) => reemplazar(await api.agregarObra(getToken(), id, obra));
 export const editarComentario = async (id, idObra, comentario) => reemplazar(await api.editarComentario(getToken(), id, idObra, comentario));
 export const quitarObra = async (id, idObra) => reemplazar(await api.quitarObra(getToken(), id, idObra));
+
+// ---------- COLECCIONES DE OTROS USUARIOS (solo para mirar) ----------
+let coleccionesDeOtros = [];
+
+// PIDE AL BACK LAS COLECCIONES DE LOS DEMÁS
+export const cargarColeccionesDeOtros = async () => {
+  coleccionesDeOtros = await api.obtenerColeccionesDeOtros(getToken());
+  return coleccionesDeOtros;
+};
+
+// BUSCA UNA COLECCIÓN DE OTRO POR SU ID
+export const obtenerColeccionDeOtro = (id) => coleccionesDeOtros.find((c) => c._id === id);

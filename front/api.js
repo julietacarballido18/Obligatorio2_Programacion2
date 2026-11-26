@@ -34,3 +34,6 @@ export function borrarColeccion(token, id) { return pedirAlBack("DELETE", `/cole
 export function agregarObra(token, id, obra) { return pedirAlBack("POST", `/colecciones/${id}/obras`, token, obra) }
 export function editarComentario(token, id, idObra, comentario) { return pedirAlBack("PUT", `/colecciones/${id}/obras/${idObra}`, token, { comentario }) }
 export function quitarObra(token, id, idObra) { return pedirAlBack("DELETE", `/colecciones/${id}/obras/${idObra}`, token) }
+
+// COLECCIONES DE OTROS USUARIOS
+export function obtenerColeccionesDeOtros(token) { return pedirAlBack("GET", "/colecciones/otras", token) }

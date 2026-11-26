@@ -988,6 +988,10 @@ main {
   margin: 0.75rem 0;
 }
 
+.acciones-ver-coleccion[hidden] {
+  display: none;                           /* que hidden funcione aunque tenga display flex */
+}
+
 #boton-borrar-coleccion.confirmar {        /* segundo click: avisa que va a borrar */
   background: #000;
   color: #fff;
@@ -1101,6 +1105,26 @@ main {
   max-width: 480px;
 }
 
+/* ----- Colecciones de otros usuarios ----- */
+.carpeta-otra {
+  display: flex;
+  flex-direction: column;        /* nombre arriba, "de Juli · 3 obras" abajo */
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+}
+
+.carpeta-otra small {
+  font-size: 0.65rem;
+  opacity: 0.7;                  /* más clarito que el nombre */
+}
+
+/* Comentario del dueño, solo para leer */
+.obra-coleccion .comentario-lectura {
+  white-space: normal;           /* que baje de línea en vez de cortarse con "..." */
+  font-style: italic;
+  border-top: 1px solid #000;
+}
 
 /* =========================================================
    12. ONBOARDING (pantalla de bienvenida)
@@ -1549,6 +1573,16 @@ main {
     align-items: center;
     justify-content: center;
     text-align: center;
+  }
+
+    /* Con "Ver colecciones" son 5 botones y no entran:
+     en celular se esconde "Crear colección" (se crea con el + del cajón) */
+  #boton-abrir-nueva-coleccion {
+    display: none;
+  }
+
+  .boton-nav {
+    padding: 0.45rem 0.2rem;               /* un poco menos de aire para que entren los 4 */
   }
 
   /* Menú de filtros: ancho de la pantalla, debajo del header */

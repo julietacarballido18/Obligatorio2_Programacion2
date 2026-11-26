@@ -217,9 +217,11 @@ const tituloVerColeccion = document.getElementById("titulo-ver-coleccion");
 const descripcionVerColeccion = document.getElementById("descripcion-ver-coleccion");
 const grillaObrasColeccion = document.getElementById("grilla-obras-coleccion");
 
-export const renderizarVerColeccion = (coleccion, color) => {
+export const renderizarVerColeccion = (coleccion, color, soloLectura = false) => {
   carpetaAbierta.className = `carpeta-abierta color-${color}`;   //mismo color que en el cajón
-  pestanaAbierta.textContent = `♥ ${coleccion.nombre}`;
+    pestanaAbierta.textContent = soloLectura
+    ? `♥ ${coleccion.nombre} · de ${coleccion.usuario?.nombre ?? "otro usuario"}`   //de otro: dice de quién es
+    : `♥ ${coleccion.nombre}`;
   tituloVerColeccion.textContent = coleccion.nombre;
   descripcionVerColeccion.textContent = coleccion.descripcion;   //si quedó vacía, no se ve nada
   grillaObrasColeccion.innerHTML = "";
@@ -267,7 +269,51 @@ export const renderizarVerColeccion = (coleccion, color) => {
     const estado = document.createElement("p");
     estado.className = "estado-comentario";
 
-    tarjeta.append(quitar, abrir, datos, comentario, estado);
+       if (soloLectura) {                               //colección de otro: sin ✕ ni cuadro para escribir
+      tarjeta.append(abrir, datos);
+      if (obra.comentario) {                         //si el dueño dejó comentario, se muestra como texto
+        const nota = document.createElement("p");
+        nota.className = "comentario-lectura";
+        nota.textContent = `“${obra.comentario}”`;
+        tarjeta.append(nota);
+      }
+    } else {
+      tarjeta.append(quitar, abrir, datos, comentario, estado);
+    }
     grillaObrasColeccion.appendChild(tarjeta);
+  });
+};
+
+//POP UP COLECCIONES DE OTROS USUARIOS
+const grillaOtrasColecciones = document.getElementById("grilla-otras-colecciones");
+
+export const renderizarOtrasColecciones = (colecciones) => {
+  grillaOtrasColecciones.innerHTML = "";                 //vacía la grilla antes de dibujar
+
+  if (colecciones.length === 0) {                       //nadie más tiene colecciones con obras
+    const mensaje = document.createElement("p");
+    mensaje.className = "mensaje-sin-colecciones";
+    mensaje.textContent = "Todavía no hay colecciones de otros usuarios.";
+    grillaOtrasColecciones.appendChild(mensaje);
+    return;
+  }
+
+  colecciones.forEach((coleccion, indice) => {
+    const carpeta = document.createElement("button");
+    carpeta.type = "button";
+    carpeta.className = "carpeta-elegir carpeta-otra";   //mismo estilo que las carpetitas de "Agregar a colección"
+    carpeta.dataset.id = coleccion._id;                  //para saber cuál abrir al tocarla
+    carpeta.dataset.color = indice % 6;                  //un color de la paleta (hay 6)
+
+    const nombre = document.createElement("span");
+    nombre.textContent = coleccion.nombre;
+
+    const detalle = document.createElement("small");
+    const dueno = coleccion.usuario?.nombre ?? "otro usuario";
+    const cantidad = coleccion.obras.length;
+    detalle.textContent = `de ${dueno} · ${cantidad} ${cantidad === 1 ? "obra" : "obras"}`;
+
+    carpeta.append(nombre, detalle);
+    grillaOtrasColecciones.appendChild(carpeta);
   });
 };

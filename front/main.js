@@ -10,8 +10,9 @@ import {
   renderizarColecciones,
   renderizarElegirColeccion,
   renderizarVerColeccion,
+  renderizarOtrasColecciones
 } from "./render.js";
-import { crearColeccion, obtenerColecciones, agregarObraAColeccion, obtenerColeccion, cargarColecciones, vaciarColecciones, editarColeccion, borrarColeccion, editarComentario, quitarObra } from "./colecciones.js";
+import { crearColeccion, obtenerColecciones, agregarObraAColeccion, obtenerColeccion, cargarColecciones, vaciarColecciones, editarColeccion, borrarColeccion, editarComentario, quitarObra, cargarColeccionesDeOtros, obtenerColeccionDeOtro } from "./colecciones.js";
 import { login, registrar, estaLogueado, cerrarSesion } from "./auth.js";
 
 
@@ -83,7 +84,7 @@ const cargarMasObras = async () => {
     } else {                                              /* ninguno: listado general, página al azar */
       respuesta = await obtenerListadoObras(paginaAlAzarNueva());
     }
-        let obras = respuesta.data;
+    let obras = respuesta.data;
     if (!filtroActivo && !busquedaActiva) {   /* solo en la galería de inicio */
       obras = conImagen(obras);
     }
@@ -104,7 +105,7 @@ const aplicarFiltro = async (campo, valor) => {
   busquedaActiva = null;        /* filtrar apaga la búsqueda */
   campoBusqueda.value = "";
   mostrarCargando();
-      
+
   try {
     const respuesta = await filtrarObras(campo, valor, 1);
     renderizarGaleria(respuesta.data);
@@ -170,10 +171,10 @@ const abrirNuevaColeccion = () => {
   idEditando = null;
   tituloNuevaColeccion.textContent = "Nueva colección";
   botonGuardarColeccion.textContent = "Crear colección";
-  campoNombreColeccion.value = "";          
+  campoNombreColeccion.value = "";
   campoDescripcionColeccion.value = "";
-  errorNuevaColeccion.hidden = true;        
-  modalNuevaColeccion.hidden = false;       
+  errorNuevaColeccion.hidden = true;
+  modalNuevaColeccion.hidden = false;
 };
 
 const cerrarNuevaColeccion = () => {
@@ -354,7 +355,7 @@ formularioNuevaColeccion.addEventListener("submit", async (evento) => {
   const nombre = campoNombreColeccion.value.trim();          //saca los espacios sobrantes 
   const descripcion = campoDescripcionColeccion.value.trim();
 
-  if (nombre === "") {                                      
+  if (nombre === "") {
     errorNuevaColeccion.textContent = "Ponele un nombre a tu colección."; //nombre es obligatorio
     errorNuevaColeccion.hidden = false;
     return;
@@ -393,17 +394,24 @@ formularioNuevaColeccion.addEventListener("submit", async (evento) => {
 //listener de clicks de toda la página: carpetas del cajón, obras de una colección, agregar a colección, carpetitas, opciones de filtro, tarjetas y cerrar modal. Estos elementos los crea el JS después de cargar la página, por eso van acá  no con su propio addEventListener): el repartidor escucha todo el document, así detecta clicks en elementos creados en cualquier momento.
 
 document.addEventListener("click", (evento) => {
+  const carpetaOtra = evento.target.closest(".carpeta-otra");
+  if (carpetaOtra) {
+    abrirColeccionDeOtro(carpetaOtra.dataset.id, carpetaOtra.dataset.color);
+    return;
+  }
+
   const carpetaColeccion = evento.target.closest(".carpeta-coleccion");  //carpeta del cajón
   if (carpetaColeccion) {
     abrirVerColeccion(carpetaColeccion.dataset.id, carpetaColeccion.dataset.color);
     return;
+
   }
 
- 
+
 
   const botonQuitarObra = evento.target.closest(".quitar-obra");                //quitar una obra de la colección
   if (botonQuitarObra) {
-      pedirQuitarObra(botonQuitarObra);
+    pedirQuitarObra(botonQuitarObra);
     return;
   }
 
@@ -456,10 +464,10 @@ let coleccionElegida = null;   //carpeta seleccionada, arranca en null
 
 const abrirAgregarColeccion = () => {
   coleccionElegida = null;    //inicio del pop up: boton de seleccionar desactivado y ninguna carpeta seleccionada 
-  botonConfirmarAgregar.disabled = true;                
+  botonConfirmarAgregar.disabled = true;
   botonConfirmarAgregar.textContent = "Elegí una colección";
   errorAgregarColeccion.hidden = true;
-  renderizarElegirColeccion(obtenerColecciones());      
+  renderizarElegirColeccion(obtenerColecciones());
   modalAgregarColeccion.hidden = false;
 };
 
@@ -475,7 +483,7 @@ const elegirColeccion = (carpeta) => {
   carpeta.classList.add("seleccionada");
 
   coleccionElegida = carpeta.dataset.id;                                    // guardamos el id (lo necesita el back)
-  botonConfirmarAgregar.disabled = false;                               
+  botonConfirmarAgregar.disabled = false;
   botonConfirmarAgregar.textContent = `Agregar a ${carpeta.textContent}`;   // el nombre lo sacamos del texto de la carpetita
   errorAgregarColeccion.hidden = true;
 };
@@ -522,6 +530,7 @@ const abrirVerColeccion = (id, color) => {
   renderizarVerColeccion(obtenerColeccion(id), color);   // busca la colección por su id y la dibuja
   reiniciarBorrar();                                      // el botón de borrar arranca sin confirmar
   errorVerColeccion.hidden = true;                        // sin errores viejos
+  accionesVerColeccion.hidden = false;                    // en tus colecciones se ven Editar y Borrar
   modalVerColeccion.hidden = false;
 };
 
@@ -629,6 +638,41 @@ document.getElementById("boton-aceptar-confirmar").addEventListener("click", asy
   redibujarColeccionAbierta();                                // la tarjeta desaparece
 });
 
+// ---------- VER COLECCIONES DE OTROS USUARIOS ----------
+const accionesVerColeccion = document.querySelector(".acciones-ver-coleccion");
+const modalOtrasColecciones = document.getElementById("modal-otras-colecciones");
+const errorOtrasColecciones = document.getElementById("error-otras-colecciones");
+
+// ABRE EL POP UP Y PIDE AL BACK LAS COLECCIONES DE LOS DEMÁS
+document.getElementById("boton-ver-colecciones").addEventListener("click", async () => {
+  errorOtrasColecciones.hidden = true;
+  modalOtrasColecciones.hidden = false;                   // se abre enseguida y se llena cuando llegan los datos
+  try {
+    renderizarOtrasColecciones(await cargarColeccionesDeOtros());
+  } catch (error) {
+    renderizarOtrasColecciones([]);
+    manejarErrorColecciones(error, errorOtrasColecciones); // ej: 401 → vuelve al login
+  }
+});
+
+const cerrarOtrasColecciones = () => {
+  modalOtrasColecciones.hidden = true;
+};
+
+document.getElementById("boton-cerrar-otras-colecciones").addEventListener("click", cerrarOtrasColecciones);
+modalOtrasColecciones.addEventListener("click", (evento) => {
+  if (evento.target === modalOtrasColecciones) cerrarOtrasColecciones();   //click en el fondo cierra
+});
+
+// ABRE UNA COLECCIÓN DE OTRO, SOLO PARA MIRAR
+const abrirColeccionDeOtro = (id, color) => {
+  coleccionAbierta = null;                                // no es tuya: no se puede editar
+  renderizarVerColeccion(obtenerColeccionDeOtro(id), color, true);   // true = solo lectura
+  accionesVerColeccion.hidden = true;                     // sin Editar ni Borrar
+  errorVerColeccion.hidden = true;
+  modalVerColeccion.hidden = false;
+};
+
 // ---------- VOLVER AL INICIO: galería nueva, sin búsqueda ni filtro ----------
 const volverAlInicio = () => {
   filtroActivo = null;           // apaga el filtro, si había
@@ -645,7 +689,7 @@ const seccionColecciones = document.querySelector(".seccion-colecciones");
 
 botonesVista.forEach((boton) => {
   boton.addEventListener("click", () => {
-      if (boton.dataset.vista === "explorar") {
+    if (boton.dataset.vista === "explorar") {
       window.scrollTo({ top: 0, behavior: "smooth" }); /* sube hasta arriba de todo, con animación suave */
       volverAlInicio();                                /* y recarga la galería con obras nuevas */
     } else if (boton.dataset.vista === "colecciones") {
