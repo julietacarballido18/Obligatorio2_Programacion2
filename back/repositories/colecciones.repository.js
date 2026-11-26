@@ -50,3 +50,8 @@ export async function eliminar(id) {
 export async function guardarCambios(coleccion) {
     return await coleccion.save()
 }
+
+// BUSCA TODAS LAS COLECCIONES (de todos los usuarios)
+export async function buscarTodas() {
+    return await Coleccion.find()
+}
