@@ -5,8 +5,11 @@ import {
     guardar,
     actualizar,
     eliminar,
-    guardarCambios
+    guardarCambios,
+    buscarTodas
 } from "../repositories/colecciones.repository.js"
+
+import { buscarPorId as buscarUsuarioPorId } from "../repositories/usuarios.repository.js"
 
 
 // HELPERS (no exportar)
@@ -126,4 +129,25 @@ export async function quitarObra(usuarioId, id, idObra) {
 
     coleccion.obras = coleccion.obras.filter((obra) => obra.id !== Number(idObra))
     return await guardarCambios(coleccion)
+}
+
+// LISTAR LAS COLECCIONES DE OTROS USUARIOS (solo las que tienen obras, con el nombre del dueño)
+export async function listarColeccionesDeOtros(usuarioId) {
+    const todas = await buscarTodas()
+    const deOtros = todas.filter((coleccion) =>
+        coleccion.usuario.toString() !== usuarioId && coleccion.obras.length > 0
+    )
+
+    const resultado = []
+    for (const coleccion of deOtros) {
+        const dueno = await buscarUsuarioPorId(coleccion.usuario)
+        resultado.push({
+            _id: coleccion._id,
+            nombre: coleccion.nombre,
+            descripcion: coleccion.descripcion,
+            obras: coleccion.obras,
+            usuario: { nombre: dueno ? dueno.nombre : "otro usuario" }
+        })
+    }
+    return resultado
 }
